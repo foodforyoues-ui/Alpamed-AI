@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id                      Int                @id @default(autoincrement())
+  patientName             String
+  phone                   String             @unique
+  realAge                 Int?
+
+  // Hábitos (editables)
+  doesExercise            Boolean            @default(false)
+  exerciseType            String?
+  sleepHours              Float?
+  dailySteps              Int?
+
+  // Blueprint para la IA (editables)
+  generalRecommendation   String?
+  specificRecommendations String[]
+
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+
+  snapshots               ProfileSnapshot[]
+  messages                MessageLog[]
+}
+
+// Cada "Registrar Seguimiento" crea un nuevo registro aquí
+model ProfileSnapshot {
+  id                   Int      @id @default(autoincrement())
+  profileId            Int
+  profile              Profile  @relation(fields: [profileId], references: [id])
+
+  // Mediciones de esta consulta
+  weight               Float?
+  bmi                  Float?
+  bodyFatPercentage    Float?
+  muscleMassPercentage Float?
+  metabolicAge         Int?
+  lostWeight           Float?
+
+  // Peso de referencia inicial si es la primera medición
+  isInitialRecord      Boolean  @default(false)
+
+  notes                String?
+  recordedAt           DateTime @default(now())
+}
+
+model MessageLog {
+  id          Int      @id @default(autoincrement())
+  profileId   Int
+  profile     Profile  @relation(fields: [profileId], references: [id])
+  content     String
+  status      String   @default("generated")
+  sentAt      DateTime @default(now())
+}

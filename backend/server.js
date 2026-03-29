@@ -1,0 +1,123 @@
+import express from 'express';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import cors from 'cors';
+import { generateTestMessage, generateMessageForProfile } from './src/services/ai.js';
+import { setIo, getClient, getIsReady, initWhatsApp, sendWhatsAppMessage } from './src/services/whatsapp.js';
+import prisma from './src/config/db.js';
+import profileRoutes from './src/routes/profile.routes.js';
+import snapshotRoutes from './src/routes/snapshot.routes.js';
+import messageRoutes from './src/routes/message.routes.js';
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// --- API REST ---
+app.use('/api/profiles', profileRoutes);
+app.use('/api/profiles/:id/snapshots', snapshotRoutes);
+app.use('/api/messages', messageRoutes);
+
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+    cors: {
+        origin: "http://localhost:3000",
+        methods: ["GET", "POST"]
+    }
+});
+
+// Registrar io en el singleton de WhatsApp y en la app (para las rutas)
+setIo(io);
+app.set('io', io);
+
+// Configuración de rutas básicas
+app.get('/', (req, res) => {
+    res.send({ status: 'API is running', whatsappReady: getIsReady() });
+});
+
+// Iniciar sesión bajo demanda a través de Websockets
+io.on('connection', (socket) => {
+    console.log(`Cliente web conectado: ${socket.id}`);
+
+    // Si ya está listo, avisarle de inmediato
+    if (getIsReady()) {
+        socket.emit('ready', { status: 'Ya conectado' });
+    }
+
+    socket.on('start-connection', () => {
+        if (!getClient()) {
+            initWhatsApp();
+        } else if (getIsReady()) {
+            socket.emit('ready', { status: 'Ya conectado' });
+        } else {
+            console.log('El cliente ya está en proceso de inicio.');
+        }
+    });
+
+    socket.on('send_message', async (data) => {
+        if (getClient() && getIsReady()) {
+            let profile = null;
+            let text = null;
+            let status = 'failed';
+            try {
+                const { profileId, number, patientName, topic } = data;
+
+                if (profileId) {
+                    profile = await prisma.profile.findUnique({ where: { id: parseInt(profileId) } });
+                }
+
+                if (profile) {
+                    text = await generateMessageForProfile(profile);
+                } else {
+                    text = await generateTestMessage(patientName, topic);
+                }
+
+                console.log('Mensaje generado para enviar:', text);
+
+                const targetNumber = profile?.phone || number;
+                await sendWhatsAppMessage(targetNumber, text);
+                status = 'sent';
+                socket.emit('message_sent', { success: true, to: targetNumber });
+            } catch (e) {
+                console.error('Error al enviar mensaje desde la UI:', e);
+                socket.emit('message_sent', { success: false, error: e.message });
+            } finally {
+                if (profile && text) {
+                    await prisma.messageLog.create({
+                        data: { profileId: profile.id, content: text, status }
+                    }).catch(err => console.error('Error al guardar historial de mensaje:', err));
+                }
+            }
+        }
+    });
+
+    socket.on('logout', async () => {
+        const client = getClient();
+        if (client && getIsReady()) {
+            try {
+                await client.logout();
+                socket.emit('disconnected', { reason: 'Log out manual' });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log(`Cliente web desconectado: ${socket.id}`);
+    });
+});
+
+const PORT = process.env.PORT || 3001;
+
+prisma.$connect()
+    .then(() => {
+        console.log('✅ Base de datos conectada exitosamente a Azure');
+        httpServer.listen(PORT, () => {
+            console.log(`Servidor Backend escuchando en el puerto ${PORT}`);
+        });
+    })
+    .catch((error) => {
+        console.error('❌ Error al conectar a la base de datos:', error);
+        process.exit(1);
+    });
