@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nutria - Dashboard de Nutricionista
 
-## Getting Started
+Este es el frontend de la plataforma Nutria, construido con Next.js 15. Proporciona una interfaz intuitiva para la gestión de pacientes, registro de mediciones de bioimpedancia y comunicación automática via WhatsApp con IA.
 
-First, run the development server:
+## 🛠️ Tecnologías
+
+- **Next.js 15 (App Router)**: Framework de React para el desarrollo de aplicaciones web de alto rendimiento.
+- **Tailwind CSS**: Estilado moderno y personalizable.
+- **Lucide React**: Iconografía elegante y compacta.
+- **Socket.io-client**: Conexión bidireccional con el backend para estado de WhatsApp y progreso.
+- **TypeScript**: Tipado estático para mayor calidad de código.
+
+## 📋 Requisitos Previos
+
+- Node.js (v18 o superior)
+- Backend de Nutria corriendo en `http://localhost:3001` (por defecto).
+
+## 🚀 Instalación
+
+1.  **Instalar dependencias**:
+    ```bash
+    npm install
+    ```
+
+2.  **Configuración**:
+    Actualmente, la URL del backend está configurada a `http://localhost:3001` en los archivos de la aplicación. Asegúrate de modificarla si el puerto es diferente.
+
+## 🏃 Ejecución
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Funcionalidades Incluidas
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Página de Inicio (Dashboard)**: Visualización rápida de todos los pacientes, sus mediciones clave (Edad, Peso, IMC) y acceso directo a edición o mensajería.
+- **Panel de WhatsApp**: Sección dedicada para vincular el dispositivo mediante código QR, ver estado de conexión y realizar envíos masivos.
+- **Expediente Detallado**:
+  - **Pestaña de Edición**: Datos fijos (Hábitos, Recomendaciones de IA).
+  - **Pestaña de Seguimiento (Snapshots)**: Historial completo de consultas con progreso de peso (↓/↑) y notas clínicas.
+  - **Pestaña de Mensajería**: Historial de todos los mensajes enviados al paciente con su estado (Enviado/Fallido).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📁 Estructura de Carpetas
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `src/app/`: Estructura de rutas (App Router).
+- `src/app/profiles/[id]/`: Vista detallada de cada paciente y formulario de envío de IA individual.
+- `src/app/profiles/new/`: Formulario de creación de nuevos pacientes.
+- `src/app/page.tsx`: Dashboard principal y sección de WhatsApp.
+- `public/`: Assets estáticos.
