@@ -28,6 +28,7 @@ model Profile {
 
   snapshots               ProfileSnapshot[]
   messages                MessageLog[]
+  appointments            Appointment[]
 }
 
 // Cada "Registrar Seguimiento" crea un nuevo registro aquí
@@ -58,4 +59,16 @@ model MessageLog {
   content     String
   status      String   @default("generated")
   sentAt      DateTime @default(now())
+}
+
+model Appointment {
+  id          Int      @id @default(autoincrement())
+  profileId   Int
+  profile     Profile  @relation(fields: [profileId], references: [id])
+  date        DateTime
+  reason      String
+  status      String   @default("pendiente") // pendiente, completada, cancelada
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

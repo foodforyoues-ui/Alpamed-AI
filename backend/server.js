@@ -8,6 +8,7 @@ import prisma from './src/config/db.js';
 import profileRoutes from './src/routes/profile.routes.js';
 import snapshotRoutes from './src/routes/snapshot.routes.js';
 import messageRoutes from './src/routes/message.routes.js';
+import appointmentRoutes from './src/routes/appointment.routes.js';
 
 const app = express();
 app.use(cors());
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use('/api/profiles', profileRoutes);
 app.use('/api/profiles/:id/snapshots', snapshotRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/appointments', appointmentRoutes);
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {

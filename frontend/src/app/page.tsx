@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Users, Smartphone, Plus, Trash2, Edit3, MessageSquare, Activity, ChevronRight } from "lucide-react";
+import { Users, Smartphone, Plus, Trash2, Edit3, MessageSquare, Activity, ChevronRight, Calendar, Clock, MapPin, MoreVertical, X, CheckCircle, XCircle, ChevronLeft, CalendarDays } from "lucide-react";
 
 interface Profile {
   id: number;
@@ -21,8 +21,9 @@ interface Profile {
 export default function Home() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<"dashboard" | "whatsapp">("dashboard");
+  const [view, setView] = useState<"dashboard" | "whatsapp" | "appointments" | "calendar">("dashboard");
   const [deleting, setDeleting] = useState<number | null>(null);
+  const [highlightedAppointmentId, setHighlightedAppointmentId] = useState<number | null>(null);
 
   const fetchProfiles = async () => {
     try {
@@ -94,6 +95,28 @@ export default function Home() {
             >
               <Smartphone className="w-5 h-5" />
               <span className="font-medium">WhatsApp</span>
+            </button>
+            <button
+              onClick={() => setView("appointments")}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
+                view === "appointments"
+                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
+              }`}
+            >
+              <Calendar className="w-5 h-5" />
+              <span className="font-medium">Citas</span>
+            </button>
+            <button
+              onClick={() => setView("calendar")}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
+                view === "calendar"
+                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
+              }`}
+            >
+              <CalendarDays className="w-5 h-5" />
+              <span className="font-medium">Calendario</span>
             </button>
           </nav>
 
@@ -243,6 +266,20 @@ export default function Home() {
 
           {view === "whatsapp" && (
             <WhatsAppSection />
+          )}
+
+          {view === "appointments" && (
+            <AppointmentsSection 
+              highlightId={highlightedAppointmentId} 
+              onClearHighlight={() => setHighlightedAppointmentId(null)} 
+            />
+          )}
+
+          {view === "calendar" && (
+            <CalendarSection onGoToAppointment={(id) => {
+              setHighlightedAppointmentId(id);
+              setView("appointments");
+            }} />
           )}
         </main>
       </div>
@@ -485,6 +522,565 @@ function WhatsAppSection() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ============================================================
+// COMPONENTE CITAS (CRUD)
+// ============================================================
+
+interface Appointment {
+  id: number;
+  profileId: number;
+  date: string;
+  reason: string;
+  status: string;
+  notes: string | null;
+  profile: Profile;
+}
+
+function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: number | null; onClearHighlight: () => void }) {
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const [form, setForm] = useState({
+    profileId: "",
+    date: "",
+    reason: "",
+    notes: "",
+    status: "pendiente"
+  });
+
+  const fetchAppointments = async () => {
+    try {
+      const res = await fetch("http://localhost:3001/api/appointments");
+      const data = await res.json();
+      setAppointments(data);
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
+  };
+
+  const fetchProfiles = async () => {
+    try {
+      const res = await fetch("http://localhost:3001/api/profiles");
+      const data = await res.json();
+      setProfiles(data);
+    } catch (e) { console.error(e); }
+  };
+
+  useEffect(() => {
+    fetchAppointments();
+    fetchProfiles();
+  }, []);
+
+  useEffect(() => {
+    if (highlightId && !loading && appointments.length > 0) {
+      // Pequeño delay para asegurar que el DOM esté listo
+      setTimeout(() => {
+        const el = document.getElementById(`appointment-${highlightId}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        // Desvanecer el resaltado después de 3 segundos
+        setTimeout(() => onClearHighlight(), 3000);
+      }, 300);
+    }
+  }, [highlightId, loading, appointments]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.profileId || !form.date || !form.reason) return alert("Completa los campos obligatorios");
+    
+    setSaving(true);
+    try {
+      const url = editingId 
+        ? `http://localhost:3001/api/appointments/${editingId}`
+        : "http://localhost:3001/api/appointments";
+      
+      const res = await fetch(url, {
+        method: editingId ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form)
+      });
+
+      if (res.ok) {
+        fetchAppointments();
+        resetForm();
+      }
+    } catch (e) { alert("Error al guardar la cita"); }
+    finally { setSaving(false); }
+  };
+
+  const resetForm = () => {
+    setForm({ profileId: "", date: "", reason: "", notes: "", status: "pendiente" });
+    setEditingId(null);
+    setShowForm(false);
+  };
+
+  const handleEdit = (app: Appointment) => {
+    setForm({
+      profileId: app.profileId.toString(),
+      date: new Date(app.date).toISOString().slice(0, 16),
+      reason: app.reason,
+      notes: app.notes || "",
+      status: app.status
+    });
+    setEditingId(app.id);
+    setShowForm(true);
+  };
+
+  const handleUpdateStatus = async (id: number, newStatus: string) => {
+    try {
+      const res = await fetch(`http://localhost:3001/api/appointments/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (res.ok) {
+        setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a));
+      }
+    } catch (e) { alert("Error al actualizar estado"); }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("¿Eliminar esta cita?")) return;
+    try {
+      await fetch(`http://localhost:3001/api/appointments/${id}`, { method: "DELETE" });
+      setAppointments(prev => prev.filter(a => a.id !== id));
+    } catch (e) { alert("Error al eliminar"); }
+  };
+
+  return (
+    <div className="p-8">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-2xl font-bold text-white">Gestión de Citas</h2>
+          <p className="text-slate-400 mt-1">Programa y organiza las consultas de tus pacientes</p>
+        </div>
+        <button
+          onClick={() => setShowForm(true)}
+          className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold px-5 py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/30"
+        >
+          <Plus className="w-5 h-5" /> Nueva Cita
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+              <h3 className="text-white font-bold text-lg">{editingId ? "Editar Cita" : "Nueva Cita"}</h3>
+              <button onClick={resetForm} className="text-slate-500 hover:text-white"><X className="w-6 h-6" /></button>
+            </div>
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">Paciente *</label>
+                <select
+                  value={form.profileId}
+                  onChange={e => setForm(p => ({ ...p, profileId: e.target.value }))}
+                  disabled={!!editingId}
+                  className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
+                >
+                  <option value="">-- Selecciona un paciente --</option>
+                  {profiles.map(p => (
+                    <option key={p.id} value={p.id}>{p.patientName}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">Fecha y Hora *</label>
+                <input
+                  type="datetime-local"
+                  value={form.date}
+                  onChange={e => setForm(p => ({ ...p, date: e.target.value }))}
+                  className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">Motivo *</label>
+                <input
+                  type="text"
+                  placeholder="Ej: Evaluación inicial, Seguimiento quincenal"
+                  value={form.reason}
+                  onChange={e => setForm(p => ({ ...p, reason: e.target.value }))}
+                  className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+              {editingId && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Estado</label>
+                  <select
+                    value={form.status}
+                    onChange={e => setForm(p => ({ ...p, status: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="pendiente">Pendiente</option>
+                    <option value="completada">Completada</option>
+                    <option value="cancelada">Cancelada</option>
+                    <option value="caducada" disabled>Caducada (Auto)</option>
+                  </select>
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">Notas adicionales</label>
+                <textarea
+                  placeholder="Instrucciones previas o recordatorios..."
+                  value={form.notes}
+                  onChange={e => setForm(p => ({ ...p, notes: e.target.value }))}
+                  rows={2}
+                  className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={resetForm} className="flex-1 py-3 bg-slate-800 text-slate-300 font-semibold rounded-xl hover:bg-slate-700 transition-all">Cancelar</button>
+                <button type="submit" disabled={saving} className="flex-1 py-3 bg-emerald-500 text-white font-semibold rounded-xl hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/20">
+                  {saving ? "Guardando..." : editingId ? "Actualizar" : "Crear Cita"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {loading ? (
+        <div className="flex items-center justify-center py-24">
+          <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : appointments.length === 0 ? (
+        <div className="text-center py-24 bg-slate-800/40 rounded-3xl border border-slate-700/50">
+          <Calendar className="w-16 h-16 text-slate-700 mx-auto mb-4" />
+          <p className="text-slate-400 text-lg font-medium">No hay citas programadas</p>
+          <p className="text-slate-600 mt-2">Personaliza tu agenda agendando la primera cita.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          {appointments.map((app) => (
+            <div 
+              key={app.id} 
+              id={`appointment-${app.id}`}
+              className={`bg-slate-800/60 backdrop-blur border rounded-2xl p-5 hover:border-emerald-500/30 transition-all duration-500 ${
+                highlightId === app.id 
+                ? 'border-emerald-500 ring-2 ring-emerald-500/50 scale-[1.02] bg-emerald-500/10 shadow-2xl shadow-emerald-500/20' 
+                : 'border-slate-700/50'
+              }`}
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-slate-700 rounded-xl flex flex-col items-center justify-center text-emerald-400 font-bold border border-slate-600">
+                    <span className="text-[10px] uppercase leading-none opacity-60">{new Date(app.date).toLocaleString('es-ES', { month: 'short' })}</span>
+                    <span className="text-xl leading-none">{new Date(app.date).getDate()}</span>
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold leading-tight">{app.profile.patientName}</h3>
+                    <div className="flex items-center gap-1.5 text-slate-500 text-xs mt-1">
+                      <Clock className="w-3 h-3" />
+                      {new Date(app.date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                  </div>
+                </div>
+                <StatusBadge status={app.status} />
+              </div>
+
+              <div className="bg-slate-900/50 rounded-xl p-3 mb-4">
+                <p className="text-slate-300 text-sm font-medium">Motivo:</p>
+                <p className="text-slate-400 text-sm mt-0.5 line-clamp-1">{app.reason}</p>
+              </div>
+
+              {app.notes && (
+                <p className="text-[11px] text-slate-500 italic mb-4 line-clamp-2">📝 {app.notes}</p>
+              )}
+
+              <div className="flex gap-2 pt-3 border-t border-slate-700/50">
+                <button
+                  onClick={() => handleEdit(app)}
+                  className="flex-1 flex items-center justify-center gap-2 bg-slate-700/50 hover:bg-slate-700 text-slate-300 text-xs font-medium py-2 rounded-lg transition-all"
+                >
+                  <Edit3 className="w-3.5 h-3.5" /> Editar
+                </button>
+                
+                {app.status === 'pendiente' && (
+                  <>
+                    <button
+                      onClick={() => handleUpdateStatus(app.id, 'completada')}
+                      title="Marcar como completada"
+                      className="p-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg transition-all border border-emerald-500/20"
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleUpdateStatus(app.id, 'cancelada')}
+                      title="Cancelar cita"
+                      className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-all border border-red-500/20"
+                    >
+                      <XCircle className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
+
+                {app.status !== 'pendiente' && (
+                  <button
+                    onClick={() => handleUpdateStatus(app.id, 'pendiente')}
+                    title="Re-abrir cita"
+                    className="p-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 rounded-lg transition-all border border-amber-500/20"
+                  >
+                    <Activity className="w-4 h-4" />
+                  </button>
+                )}
+
+                {app.status === 'caducada' && (
+                  <div className="flex-1 text-center py-2 bg-slate-700/20 text-slate-500 text-[10px] uppercase font-bold rounded-lg border border-slate-700/50">
+                    Cita Caducada
+                  </div>
+                )}
+
+                <button
+                  onClick={() => handleDelete(app.id)}
+                  className="p-2 bg-slate-700/30 hover:bg-red-500/10 text-slate-500 hover:text-red-400 rounded-lg transition-all border border-slate-700/50 hover:border-red-500/20"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const styles: any = {
+    pendiente: "bg-amber-500/20 text-amber-500 border-amber-500/30",
+    completada: "bg-emerald-500/20 text-emerald-500 border-emerald-500/30",
+    cancelada: "bg-red-500/20 text-red-500 border-red-500/30",
+    caducada: "bg-slate-500/20 text-slate-500 border-slate-500/30",
+  };
+  return (
+    <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded-full border ${styles[status]}`}>
+      {status === 'caducada' ? 'caducada' : status}
+    </span>
+  );
+}
+
+// ============================================================
+// COMPONENTE CALENDARIO (VISTA MENSUAL)
+// ============================================================
+
+function CalendarSection({ onGoToAppointment }: { onGoToAppointment: (id: number) => void }) {
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [loading, setLoading] = useState(true);
+  const [selectedDayApps, setSelectedDayApps] = useState<Appointment[] | null>(null);
+
+  useEffect(() => {
+    fetch("http://localhost:3001/api/appointments")
+      .then(r => r.json())
+      .then(setAppointments)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Lógica del Calendario
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+
+  const firstDayOfMonth = new Date(year, month, 1).getDay();
+  // Ajustar para que Lunes sea 0 (JS por defecto: Domingo=0)
+  const startingDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
+  const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
+  const goToToday = () => setCurrentDate(new Date());
+
+  const monthName = new Intl.DateTimeFormat('es-ES', { month: 'long' }).format(currentDate);
+
+  const months = [
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+  ];
+
+  const years = [];
+  const startYear = 2000;
+  const endYear = new Date().getFullYear() + 10;
+  for (let y = startYear; y <= endYear; y++) years.push(y);
+
+  const handleMonthChange = (m: number) => setCurrentDate(new Date(year, m, 1));
+  const handleYearChange = (y: number) => setCurrentDate(new Date(y, month, 1));
+
+  const days = [];
+  // Espacios vacíos para el inicio del mes
+  for (let i = 0; i < startingDay; i++) days.push(null);
+  // Días del mes
+  for (let d = 1; d <= daysInMonth; d++) days.push(new Date(year, month, d));
+
+  const getAppsForDay = (date: Date) => {
+    return appointments.filter(a => {
+      const aDate = new Date(a.date);
+      return aDate.getDate() === date.getDate() &&
+             aDate.getMonth() === date.getMonth() &&
+             aDate.getFullYear() === date.getFullYear();
+    });
+  };
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-full">
+      <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+
+  return (
+    <div className="p-8 h-full flex flex-col">
+      {/* Header del Calendario */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <select 
+                value={month}
+                onChange={(e) => handleMonthChange(parseInt(e.target.value))}
+                className="bg-transparent text-2xl font-bold text-white capitalize outline-none cursor-pointer hover:text-emerald-400 transition-colors appearance-none"
+              >
+                {months.map((m, i) => (
+                  <option key={m} value={i} className="bg-slate-900 text-base">{m}</option>
+                ))}
+              </select>
+              <select 
+                value={year}
+                onChange={(e) => handleYearChange(parseInt(e.target.value))}
+                className="bg-transparent text-2xl font-medium text-slate-500 outline-none cursor-pointer hover:text-emerald-400 transition-colors appearance-none"
+              >
+                {years.map(y => (
+                  <option key={y} value={y} className="bg-slate-900 text-base">{y}</option>
+                ))}
+              </select>
+            </div>
+            <p className="text-slate-400 text-sm">Navega rápidamente por tu agenda</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 bg-slate-800/50 p-1.5 rounded-xl border border-slate-700/50 shadow-inner">
+          <button onClick={prevMonth} className="p-2 hover:bg-slate-700 text-slate-300 rounded-lg transition-all"><ChevronLeft className="w-5 h-5" /></button>
+          <button onClick={goToToday} className="px-4 py-2 text-xs font-bold text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all">HOY</button>
+          <button onClick={nextMonth} className="p-2 hover:bg-slate-700 text-slate-300 rounded-lg transition-all"><ChevronRight className="w-5 h-5" /></button>
+        </div>
+      </div>
+
+      {/* Grid del Calendario */}
+      <div className="flex-1 bg-slate-900/40 border border-slate-800 rounded-2xl overflow-hidden flex flex-col shadow-2xl">
+        {/* Días de la semana */}
+        <div className="grid grid-cols-7 border-b border-slate-800 bg-slate-800/30">
+          {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(d => (
+            <div key={d} className="py-3 text-center text-[10px] uppercase font-bold tracking-widest text-slate-500">{d}</div>
+          ))}
+        </div>
+
+        {/* Celdas */}
+        <div className="flex-1 grid grid-cols-7 auto-rows-fr">
+          {days.map((date, i) => {
+            if (!date) return <div key={`empty-${i}`} className="border-b border-r border-slate-800/50 bg-slate-950/20" />;
+            
+            const isToday = date.toDateString() === new Date().toDateString();
+            const dayApps = getAppsForDay(date);
+
+            return (
+              <div 
+                key={date.toISOString()} 
+                onClick={() => dayApps.length > 0 && setSelectedDayApps(dayApps)}
+                className={`border-b border-r border-slate-800 p-2 transition-all hover:bg-emerald-500/5 group cursor-pointer relative ${isToday ? 'bg-emerald-500/5' : ''}`}
+              >
+                <span className={`text-xs font-bold ${isToday ? 'text-emerald-400 bg-emerald-500/20 w-6 h-6 rounded-full flex items-center justify-center' : 'text-slate-500 group-hover:text-slate-300'}`}>
+                  {date.getDate()}
+                </span>
+                
+                <div className="mt-1 space-y-1 overflow-hidden h-[calc(100%-24px)] flex flex-col justify-start">
+                  {dayApps.map(app => (
+                    <div key={app.id} className={`text-[9px] px-1.5 py-0.5 rounded border flex items-center gap-1 truncate ${
+                      app.status === 'completada' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
+                      app.status === 'cancelada' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                      app.status === 'caducada' ? 'bg-slate-700/50 text-slate-500 border-slate-700/50 opacity-60' :
+                      'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                    }`}>
+                      <span className="font-bold opacity-70">
+                        {new Date(app.date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                      {app.profile.patientName}
+                    </div>
+                  ))}
+                  {dayApps.length > 4 && (
+                    <div className="text-[8px] text-slate-500 text-center font-medium">+{dayApps.length - 4} más</div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Modal de Detalle de Día */}
+      {selectedDayApps && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-800/20">
+              <div>
+                <h3 className="text-white font-bold text-lg">Citas del Día</h3>
+                <p className="text-slate-400 text-sm">{new Date(selectedDayApps[0].date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+              </div>
+              <button onClick={() => setSelectedDayApps(null)} className="text-slate-500 hover:text-white p-2 hover:bg-slate-800 rounded-xl transition-all">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4 max-h-[60vh] overflow-auto">
+              {selectedDayApps.map(app => (
+                <div 
+                  key={app.id} 
+                  onClick={() => onGoToAppointment(app.id)}
+                  className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4 flex items-center justify-between hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all cursor-pointer group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="text-emerald-400 font-bold bg-emerald-500/10 px-2 py-1 rounded text-xs border border-emerald-500/20 group-hover:bg-emerald-500/20">
+                      {new Date(app.date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                    <div>
+                      <h4 className="text-white font-semibold group-hover:text-emerald-400 transition-colors">{app.profile.patientName}</h4>
+                      <p className="text-slate-500 text-xs">{app.reason}</p>
+                    </div>
+                  </div>
+                  <StatusBadge status={app.status} />
+                </div>
+              ))}
+            </div>
+            <div className="p-4 bg-slate-800/30 text-center">
+              <button 
+                onClick={() => setSelectedDayApps(null)}
+                className="text-slate-400 hover:text-white text-sm font-medium"
+              >Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StatBadge({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="text-center">
+      <p className="text-emerald-400 font-bold text-lg leading-tight">{value}</p>
+      <p className="text-slate-500 text-xs mt-0.5">{label}</p>
+    </div>
+  );
+}
+
+function MiniStat({ label, value, unit = "", highlight = false }: { label: string; value: string; unit?: string; highlight?: boolean }) {
+  return (
+    <div className="bg-slate-700/40 rounded-lg p-2 text-center">
+      <p className={`font-bold text-base leading-tight ${highlight ? "text-emerald-400" : "text-slate-200"}`}>{value}{value !== "—" ? unit : ""}</p>
+      <p className="text-slate-500 text-xs mt-0.5">{label}</p>
     </div>
   );
 }
