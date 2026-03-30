@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Users, Smartphone, Plus, Trash2, Edit3, MessageSquare, Activity, ChevronRight, Calendar, Clock, MapPin, MoreVertical, X, CheckCircle, XCircle, ChevronLeft, CalendarDays } from "lucide-react";
+import { Users, Smartphone, Plus, Trash2, Edit3, MessageSquare, Activity, ChevronRight, Calendar, Clock, MapPin, MoreVertical, X, CheckCircle, XCircle, ChevronLeft, CalendarDays, Bell } from "lucide-react";
 
 interface Profile {
   id: number;
@@ -547,6 +547,14 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+  
+  const [reminderStatus, setReminderStatus] = useState({
+    isSending: false,
+    current: 0,
+    total: 0,
+    lastPatient: "",
+    complete: false
+  });
 
   const [form, setForm] = useState({
     profileId: "",
@@ -576,6 +584,33 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
   useEffect(() => {
     fetchAppointments();
     fetchProfiles();
+
+    // Sockets para recordatorios
+    const handleProgress = (data: any) => {
+      setReminderStatus(prev => ({
+        ...prev,
+        isSending: true,
+        current: data.current,
+        total: data.total,
+        lastPatient: data.lastPatient
+      }));
+    };
+
+    const handleComplete = (data: any) => {
+      setReminderStatus(prev => ({ ...prev, isSending: false, complete: true }));
+      setTimeout(() => setReminderStatus(p => ({ ...p, complete: false })), 5000);
+      fetchAppointments();
+    };
+
+    const socket = io("http://localhost:3001");
+    socket.on('appointment_reminder_progress', handleProgress);
+    socket.on('appointment_reminder_complete', handleComplete);
+
+    return () => {
+      socket.off('appointment_reminder_progress', handleProgress);
+      socket.off('appointment_reminder_complete', handleComplete);
+      socket.disconnect();
+    };
   }, []);
 
   useEffect(() => {
@@ -634,6 +669,29 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
     setShowForm(true);
   };
 
+  const handleSendReminders = async () => {
+    if (!confirm("Se enviará un recordatorio por WhatsApp a todos los pacientes con citas PENDIENTES. ¿Continuar?")) return;
+    try {
+      const res = await fetch("http://localhost:3001/api/appointments/reminders", { method: "POST" });
+      const data = await res.json();
+      
+      if (res.status === 200 && data.message === "No hay citas pendientes para recordar") {
+        alert("No hay citas pendientes agendadas para enviar recordatorios.");
+        return;
+      }
+
+      if (res.ok) {
+        setReminderStatus({ isSending: true, current: 0, total: data.total, lastPatient: "", complete: false });
+      } else if (res.status === 503) {
+        alert("⚠️ WhatsApp no está conectado. Por favor, ve a la pestaña de 'WhatsApp', escanea el código QR y espera a que el estado sea 'Conectado' antes de enviar recordatorios.");
+      } else {
+        alert(data.error || "Error al iniciar recordatorios");
+      }
+    } catch (e) {
+      alert("Error de conexión");
+    }
+  };
+
   const handleUpdateStatus = async (id: number, newStatus: string) => {
     try {
       const res = await fetch(`http://localhost:3001/api/appointments/${id}`, {
@@ -662,13 +720,52 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
           <h2 className="text-2xl font-bold text-white">Gestión de Citas</h2>
           <p className="text-slate-400 mt-1">Programa y organiza las consultas de tus pacientes</p>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold px-5 py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/30"
-        >
-          <Plus className="w-5 h-5" /> Nueva Cita
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleSendReminders}
+            disabled={reminderStatus.isSending}
+            className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 font-semibold px-5 py-3 rounded-xl transition-all shadow-lg"
+          >
+            <Bell className="w-5 h-5" /> Enviar Recordatorios
+          </button>
+          <button
+            onClick={() => setShowForm(true)}
+            className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold px-5 py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/30"
+          >
+            <Plus className="w-5 h-5" /> Nueva Cita
+          </button>
+        </div>
       </div>
+
+      {/* Progress Bar para Recordatorios */}
+      {reminderStatus.isSending && (
+        <div className="mb-8 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-6 animate-pulse">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
+                <Bell className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="text-white font-bold">Enviando recordatorios...</p>
+                <p className="text-slate-400 text-xs">Recordando a: <span className="text-emerald-400">{reminderStatus.lastPatient}</span></p>
+              </div>
+            </div>
+            <span className="text-emerald-400 font-bold text-sm">{reminderStatus.current} / {reminderStatus.total}</span>
+          </div>
+          <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-emerald-500 transition-all duration-500" 
+              style={{ width: `${(reminderStatus.current / reminderStatus.total) * 100}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {reminderStatus.complete && (
+        <div className="mb-8 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-center font-bold animate-bounce">
+          ✨ ¡Todos los recordatorios han sido enviados con éxito!
+        </div>
+      )}
 
       {showForm && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">

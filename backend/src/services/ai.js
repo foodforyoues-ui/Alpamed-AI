@@ -138,6 +138,49 @@ export async function generateMessageForProfile(profile) {
 }
 
 /**
+ * Genera un mensaje de recordatorio de cita personalizado.
+ * @param {Object} profile - Perfil del paciente.
+ * @param {Object} appointment - Objeto de la cita (date, reason).
+ * @returns {Promise<string>} El mensaje de recordatorio.
+ */
+export async function generateAppointmentReminder(profile, appointment) {
+    if (!endpoint || !apiKey || endpoint.includes('your-resource')) {
+        return `Hola ${profile.patientName}, te recordamos tu cita el ${new Date(appointment.date).toLocaleString()} por el motivo: ${appointment.reason}. 🥑`;
+    }
+
+    const dateStr = new Date(appointment.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+    const timeStr = new Date(appointment.date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+    const systemPrompt = [
+        "Eres el asistente de 'Nutria'. Tu misión es redactar un recordatorio de cita AMABLE y MOTIVADOR.",
+        "El mensaje debe confirmar la fecha, hora y motivo de la consulta.",
+        "Pide amablemente al paciente que confirme su asistencia respondiendo a este mensaje.",
+        "Usa emojis (mínimo 4) incluyendo siempre el 🥑.",
+        "Sé breve: máximo 2 párrafos cortos.",
+        "",
+        `PACIENTE: ${profile.patientName}`,
+        `CITA: ${dateStr} a las ${timeStr}`,
+        `MOTIVO: ${appointment.reason}`,
+    ].join('\n');
+
+    try {
+        const response = await client.chat.completions.create({
+            model: deployment,
+            messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: `Redacta el recordatorio para ${profile.patientName}.` }
+            ],
+            max_tokens: 200,
+            temperature: 0.7,
+        });
+        return response.choices[0].message.content.trim();
+    } catch (error) {
+        console.error("Error al generar recordatorio:", error);
+        return `Hola ${profile.patientName} 🥑, te recordamos tu cita de "${appointment.reason}" para el ${dateStr} a las ${timeStr}. ¡Te esperamos! ✨`;
+    }
+}
+
+/**
  * Función de prueba básica (para compatibilidad con el ai-test.js original).
  */
 export async function generateTestMessage(patientName = 'Paciente', topic = 'bienvenida') {
