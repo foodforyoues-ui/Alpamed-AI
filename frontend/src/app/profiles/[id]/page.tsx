@@ -1,12 +1,14 @@
 "use client";
 
+import { apiFetch as fetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft, Plus, Trash2, Save, Loader2, MessageSquare,
-  Clock, CheckCircle, XCircle, Activity, ChevronDown, ChevronUp, TrendingDown, TrendingUp
+  Clock, CheckCircle, XCircle, Activity, ChevronDown, ChevronUp, TrendingDown, TrendingUp, LogOut
 } from "lucide-react";
+import Cookies from "js-cookie";
 
 interface Snapshot {
   id: number;
@@ -70,7 +72,7 @@ export default function EditProfilePage() {
   });
 
   const fetchProfile = () => {
-    fetch(`http://localhost:3001/api/profiles/${id}`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/profiles/${id}`)
       .then(r => r.json())
       .then((data: ProfileData) => {
         setForm({
@@ -110,7 +112,7 @@ export default function EditProfilePage() {
       specificRecommendations: specificRecommendations.filter(r => r.trim()),
     };
     try {
-      const res = await fetch(`http://localhost:3001/api/profiles/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/profiles/${id}`, {
         method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
       });
       if (!res.ok) { const err = await res.json(); throw new Error(err.error); }
@@ -132,7 +134,7 @@ export default function EditProfilePage() {
       notes: snapshotForm.notes || null,
     };
     try {
-      const res = await fetch(`http://localhost:3001/api/profiles/${id}/snapshots`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/profiles/${id}/snapshots`, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error("Error al guardar medición");
@@ -147,7 +149,7 @@ export default function EditProfilePage() {
 
   const handleDeleteSnapshot = async (snapshotId: number) => {
     if (!confirm("¿Eliminar esta medición?")) return;
-    await fetch(`http://localhost:3001/api/profiles/${id}/snapshots/${snapshotId}`, { method: "DELETE" });
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/profiles/${id}/snapshots/${snapshotId}`, { method: "DELETE" });
     setSnapshots(prev => prev.filter(s => s.id !== snapshotId));
   };
 
@@ -163,19 +165,33 @@ export default function EditProfilePage() {
     <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-slate-900 to-slate-950 py-8 px-4">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          <Link href="/" className="p-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-400 hover:text-white transition-all">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <div className="flex-1">
-            <h1 className="text-2xl font-bold text-white">{form.patientName}</h1>
-            <p className="text-slate-400 text-sm">+{form.phone} • {snapshots.length} mediciones registradas</p>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            <Link href="/" className="p-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-400 hover:text-white transition-all">
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold text-white">{form.patientName}</h1>
+              <p className="text-slate-400 text-sm">+{form.phone} • {snapshots.length} mediciones registradas</p>
+            </div>
           </div>
-          <Link href={`/profiles/${id}/send`}
-            className="flex items-center gap-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-sm font-medium px-4 py-2.5 rounded-xl transition-all border border-emerald-500/30"
-          >
-            <MessageSquare className="w-4 h-4" /> Enviar mensaje
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href={`/profiles/${id}/send`}
+              className="flex items-center gap-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-sm font-medium px-4 py-2.5 rounded-xl transition-all border border-emerald-500/30"
+            >
+              <MessageSquare className="w-4 h-4" /> Enviar mensaje
+            </Link>
+            <button
+              onClick={() => {
+                Cookies.remove("token");
+                window.location.href = "/login";
+              }}
+              className="p-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl transition-all border border-red-500/20"
+              title="Cerrar sesión"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Último snapshot resumido */}

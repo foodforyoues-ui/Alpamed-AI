@@ -1,8 +1,10 @@
 "use client";
 
+import { apiFetch as fetch } from "@/lib/api";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Users, Smartphone, Plus, Trash2, Edit3, MessageSquare, Activity, ChevronRight, Calendar, Clock, MapPin, MoreVertical, X, CheckCircle, XCircle, ChevronLeft, CalendarDays, Bell } from "lucide-react";
+import Cookies from "js-cookie";
+import { Users, Smartphone, Plus, Trash2, Edit3, MessageSquare, Activity, ChevronRight, Calendar, Clock, MapPin, MoreVertical, X, CheckCircle, XCircle, ChevronLeft, CalendarDays, Bell, Send, LogOut, Menu } from "lucide-react";
 
 interface Profile {
   id: number;
@@ -21,13 +23,14 @@ interface Profile {
 export default function Home() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<"dashboard" | "whatsapp" | "appointments" | "calendar">("dashboard");
+  const [view, setView] = useState<"dashboard" | "whatsapp" | "messages" | "appointments" | "calendar">("dashboard");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [deleting, setDeleting] = useState<number | null>(null);
   const [highlightedAppointmentId, setHighlightedAppointmentId] = useState<number | null>(null);
 
   const fetchProfiles = async () => {
     try {
-      const res = await fetch("http://localhost:3001/api/profiles");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/profiles`);
       const data = await res.json();
       setProfiles(data);
     } catch (e) {
@@ -45,7 +48,7 @@ export default function Home() {
     if (!confirm(`¿Estás seguro de eliminar el perfil de ${name}? Esta acción no se puede deshacer.`)) return;
     setDeleting(id);
     try {
-      await fetch(`http://localhost:3001/api/profiles/${id}`, { method: "DELETE" });
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/profiles/${id}`, { method: "DELETE" });
       setProfiles(prev => prev.filter(p => p.id !== id));
     } catch (e) {
       alert("Error al eliminar el perfil.");
@@ -55,11 +58,32 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-slate-900 to-slate-950">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-slate-900 to-slate-950 flex flex-col md:flex-row">
+      
+      {/* Mobile Top Bar */}
+      <div className="md:hidden flex items-center justify-between p-4 bg-slate-900/80 border-b border-slate-800 backdrop-blur-sm sticky top-0 z-40">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
+            <span className="text-white text-sm">🥑</span>
+          </div>
+          <h1 className="text-white font-bold text-lg leading-tight">Nutria</h1>
+        </div>
+        <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-slate-400 hover:text-white bg-slate-800 rounded-xl">
+          <Menu className="w-6 h-6" />
+        </button>
+      </div>
+
+      {/* Overlay para móviles */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className="flex h-screen">
-        <aside className="w-64 bg-slate-900/80 border-r border-slate-800 flex flex-col backdrop-blur-sm">
-          {/* Logo */}
+      <aside className={`fixed md:relative inset-y-0 left-0 z-50 w-64 bg-slate-900 md:bg-slate-900/80 border-r border-slate-800 flex flex-col backdrop-blur-sm transition-transform duration-300 ease-in-out md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        {/* Logo */}
           <div className="p-6 border-b border-slate-800">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
@@ -73,9 +97,9 @@ export default function Home() {
           </div>
 
           {/* Nav */}
-          <nav className="flex-1 p-4 space-y-1">
+          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
             <button
-              onClick={() => setView("dashboard")}
+              onClick={() => { setView("dashboard"); setIsSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
                 view === "dashboard"
                   ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
@@ -86,7 +110,7 @@ export default function Home() {
               <span className="font-medium">Perfiles</span>
             </button>
             <button
-              onClick={() => setView("whatsapp")}
+              onClick={() => { setView("whatsapp"); setIsSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
                 view === "whatsapp"
                   ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
@@ -97,7 +121,18 @@ export default function Home() {
               <span className="font-medium">WhatsApp</span>
             </button>
             <button
-              onClick={() => setView("appointments")}
+              onClick={() => { setView("messages"); setIsSidebarOpen(false); }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
+                view === "messages"
+                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
+              }`}
+            >
+              <Send className="w-5 h-5" />
+              <span className="font-medium">Mensajes</span>
+            </button>
+            <button
+              onClick={() => { setView("appointments"); setIsSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
                 view === "appointments"
                   ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
@@ -108,7 +143,7 @@ export default function Home() {
               <span className="font-medium">Citas</span>
             </button>
             <button
-              onClick={() => setView("calendar")}
+              onClick={() => { setView("calendar"); setIsSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
                 view === "calendar"
                   ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
@@ -120,21 +155,32 @@ export default function Home() {
             </button>
           </nav>
 
-          {/* Stats */}
-          <div className="p-4 border-t border-slate-800">
+          {/* Stats & Actions */}
+          <div className="p-4 border-t border-slate-800 space-y-3">
             <div className="bg-slate-800/50 rounded-xl p-3">
               <p className="text-slate-500 text-xs">Total Pacientes</p>
               <p className="text-white text-2xl font-bold">{profiles.length}</p>
             </div>
+            
+            <button
+              onClick={() => {
+                Cookies.remove("token");
+                window.location.href = "/login";
+              }}
+              className="w-full flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-medium py-2.5 rounded-xl transition-all border border-red-500/20 shadow-sm"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="text-sm">Cerrar Sesión</span>
+            </button>
           </div>
         </aside>
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto">
           {view === "dashboard" && (
-            <div className="p-8">
+            <div className="p-4 md:p-8">
               {/* Header */}
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
                 <div>
                   <h2 className="text-2xl font-bold text-white">Perfiles de Pacientes</h2>
                   <p className="text-slate-400 mt-1">Gestiona expedientes y envía mensajes personalizados con IA</p>
@@ -231,7 +277,7 @@ export default function Home() {
                       </div>
 
                       {/* Actions */}
-                      <div className="flex gap-2 pt-3 border-t border-slate-700/50">
+                      <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t border-slate-700/50">
                         <Link
                           href={`/profiles/${profile.id}`}
                           className="flex-1 flex items-center justify-center gap-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-sm font-medium py-2 rounded-lg transition-all border border-emerald-500/20 hover:border-emerald-500/40"
@@ -268,6 +314,10 @@ export default function Home() {
             <WhatsAppSection />
           )}
 
+          {view === "messages" && (
+            <MessagesSection />
+          )}
+
           {view === "appointments" && (
             <AppointmentsSection 
               highlightId={highlightedAppointmentId} 
@@ -282,7 +332,6 @@ export default function Home() {
             }} />
           )}
         </main>
-      </div>
     </div>
   );
 }
@@ -303,16 +352,10 @@ function WhatsAppSection() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedProfileId, setSelectedProfileId] = useState<string>("");
   const [sendMessageStatus, setSendMessageStatus] = useState<{ loading: boolean; success?: boolean; msg?: string }>({ loading: false });
-  const [broadcastStatus, setBroadcastStatus] = useState<{ 
-    isBroadcasting: boolean; 
-    current?: number; 
-    total?: number; 
-    latest?: any;
-    complete?: boolean;
-  }>({ isBroadcasting: false });
+
 
   useEffect(() => {
-    const newSocket = io("http://localhost:3001");
+    const newSocket = io(process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}`);
     setSocket(newSocket);
 
     newSocket.on("qr", (qr: string) => { setQrCode(qr); setStatus("qr"); });
@@ -325,22 +368,9 @@ function WhatsAppSection() {
       setTimeout(() => setSendMessageStatus({ loading: false }), 5000);
     });
 
-    // Eventos de Broadcast
-    newSocket.on("broadcast_progress", (data) => {
-      setBroadcastStatus({ 
-        isBroadcasting: true, 
-        current: data.current, 
-        total: data.total, 
-        latest: data.latest 
-      });
-    });
 
-    newSocket.on("broadcast_complete", (data) => {
-      setBroadcastStatus(prev => ({ ...prev, isBroadcasting: false, complete: true }));
-      setTimeout(() => setBroadcastStatus({ isBroadcasting: false }), 10000);
-    });
 
-    fetch("http://localhost:3001/api/profiles")
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/profiles`)
       .then(r => r.json())
       .then(setProfiles)
       .catch(console.error);
@@ -355,17 +385,7 @@ function WhatsAppSection() {
     }
   };
 
-  const handleBroadcast = async () => {
-    if (confirm("Se enviará un mensaje personalizado CON IA a todos los pacientes registrados. ¿Continuar?")) {
-      setBroadcastStatus({ isBroadcasting: true, current: 0, total: profiles.length });
-      try {
-        await fetch("http://localhost:3001/api/messages/broadcast", { method: "POST" });
-      } catch (e) {
-        alert("Error al iniciar broadcast.");
-        setBroadcastStatus({ isBroadcasting: false });
-      }
-    }
-  };
+
 
   return (
     <div className="p-8 flex items-start justify-center">
@@ -457,48 +477,16 @@ function WhatsAppSection() {
                   )}
                 </div>
 
-                {/* Broadcast Section */}
-                <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-4 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h5 className="text-white font-medium flex items-center gap-2">🚀 Envío Masivo</h5>
-                      <p className="text-slate-500 text-xs">Mensaje personalizado diario para todos</p>
-                    </div>
-                  </div>
-
-                  {!broadcastStatus.isBroadcasting ? (
-                    <button
-                      onClick={handleBroadcast}
-                      className="w-full flex items-center justify-center gap-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-semibold py-3 rounded-xl transition-all border border-emerald-500/30"
-                    >
-                      <Users className="w-5 h-5" /> Enviar mensaje diario a todos
-                    </button>
-                  ) : (
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between text-xs text-slate-400">
-                        <span>Procesando envíos...</span>
-                        <span className="font-bold">{broadcastStatus.current} / {broadcastStatus.total}</span>
-                      </div>
-                      <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-emerald-500 transition-all duration-500"
-                          style={{ width: `${((broadcastStatus.current || 0) / (broadcastStatus.total || 1)) * 100}%` }}
-                        />
-                      </div>
-                      {broadcastStatus.latest && (
-                        <p className="text-[10px] text-slate-500 italic truncate">
-                          Último: {broadcastStatus.latest.patientName} - {broadcastStatus.latest.status === 'sent' ? '✅' : '❌'}
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {broadcastStatus.complete && (
-                    <p className="text-emerald-400 text-xs text-center font-medium animate-bounce">
-                      ✨ Envío masivo completado
-                    </p>
-                  )}
+                <div className="pt-2">
+                  <button
+                    onClick={() => { setStatus("loading"); socket?.emit("logout"); }}
+                    className="w-full flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-semibold py-3 rounded-xl transition-all border border-red-500/30 shadow-sm"
+                  >
+                    <LogOut className="w-5 h-5" /> Desvincular WhatsApp
+                  </button>
                 </div>
+
+
 
                 <button
                   onClick={() => socket?.emit("logout")}
@@ -527,6 +515,217 @@ function WhatsAppSection() {
 }
 
 // ============================================================
+// COMPONENTE DE MENSAJES AUTOMÁTICOS
+// ============================================================
+
+function MessagesSection() {
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [broadcastStatus, setBroadcastStatus] = useState<{ 
+    isBroadcasting: boolean; 
+    current?: number; 
+    total?: number; 
+    latest?: any;
+    complete?: boolean;
+  }>({ isBroadcasting: false });
+
+  const [reminderStatus, setReminderStatus] = useState({
+    isSending: false,
+    current: 0,
+    total: 0,
+    lastPatient: "",
+    complete: false
+  });
+
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/profiles`)
+      .then(r => r.json())
+      .then(setProfiles)
+      .catch(console.error);
+
+    const socket = io(process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}`);
+
+    const handleBroadcastProgress = (data: any) => {
+      setBroadcastStatus({ 
+        isBroadcasting: true, 
+        current: data.current, 
+        total: data.total, 
+        latest: data.latest 
+      });
+    };
+
+    const handleBroadcastComplete = (data: any) => {
+      setBroadcastStatus(prev => ({ ...prev, isBroadcasting: false, complete: true }));
+      setTimeout(() => setBroadcastStatus({ isBroadcasting: false }), 10000);
+    };
+
+    const handleReminderProgress = (data: any) => {
+      setReminderStatus(prev => ({
+        ...prev,
+        isSending: true,
+        current: data.current,
+        total: data.total,
+        lastPatient: data.lastPatient
+      }));
+    };
+
+    const handleReminderComplete = (data: any) => {
+      setReminderStatus(prev => ({ ...prev, isSending: false, complete: true }));
+      setTimeout(() => setReminderStatus(p => ({ ...p, complete: false })), 5000);
+    };
+
+    socket.on("broadcast_progress", handleBroadcastProgress);
+    socket.on("broadcast_complete", handleBroadcastComplete);
+    socket.on('appointment_reminder_progress', handleReminderProgress);
+    socket.on('appointment_reminder_complete', handleReminderComplete);
+
+    return () => {
+      socket.off("broadcast_progress", handleBroadcastProgress);
+      socket.off("broadcast_complete", handleBroadcastComplete);
+      socket.off('appointment_reminder_progress', handleReminderProgress);
+      socket.off('appointment_reminder_complete', handleReminderComplete);
+      socket.disconnect();
+    };
+  }, []);
+
+  const handleBroadcast = async () => {
+    if (confirm("Se enviará un mensaje personalizado CON IA a todos los pacientes registrados. ¿Continuar?")) {
+      setBroadcastStatus({ isBroadcasting: true, current: 0, total: profiles.length });
+      try {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/messages/broadcast`, { method: "POST" });
+      } catch (e) {
+        alert("Error al iniciar broadcast.");
+        setBroadcastStatus({ isBroadcasting: false });
+      }
+    }
+  };
+
+  const handleSendReminders = async () => {
+    if (!confirm("Se enviará un recordatorio por WhatsApp a todos los pacientes con citas PENDIENTES. ¿Continuar?")) return;
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/appointments/reminders`, { method: "POST" });
+      const data = await res.json();
+      
+      if (res.status === 200 && data.message === "No hay citas pendientes para recordar") {
+        alert("No hay citas pendientes agendadas para enviar recordatorios.");
+        return;
+      }
+
+      if (res.ok) {
+        setReminderStatus({ isSending: true, current: 0, total: data.total, lastPatient: "", complete: false });
+      } else if (res.status === 503) {
+        alert("⚠️ WhatsApp no está conectado. Por favor, ve a la pestaña de 'WhatsApp', escanea el código QR y espera a que el estado sea 'Conectado' antes de enviar recordatorios.");
+      } else {
+        alert(data.error || "Error al iniciar recordatorios");
+      }
+    } catch (e) {
+      alert("Error de conexión");
+    }
+  };
+
+  return (
+    <div className="p-8">
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-white">Central de Mensajes</h2>
+        <p className="text-slate-400 mt-1">Envía recordatorios de citas y recomendaciones masivas a tus pacientes</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Recordatorios de Citas */}
+        <div className="bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-2xl p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center">
+              <Bell className="w-6 h-6 text-emerald-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white">Recordatorios de Citas</h3>
+              <p className="text-slate-400 text-sm">Citas pendientes en agenda</p>
+            </div>
+          </div>
+          <p className="text-slate-300 text-sm mb-6">Esta acción enviará un mensaje recordatorio automático a todos los pacientes que tienen una cita programada y en estado "pendiente".</p>
+          
+          <button
+            onClick={handleSendReminders}
+            disabled={reminderStatus.isSending}
+            className="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/30"
+          >
+            <Bell className="w-5 h-5" /> Enviar Recordatorios
+          </button>
+
+          {reminderStatus.isSending && (
+            <div className="mt-4 bg-slate-900/50 rounded-xl p-4 animate-pulse">
+              <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
+                <span>Enviando a: <span className="text-emerald-400">{reminderStatus.lastPatient}</span></span>
+                <span className="font-bold">{reminderStatus.current} / {reminderStatus.total}</span>
+              </div>
+              <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-emerald-500 transition-all duration-500" 
+                  style={{ width: `${(reminderStatus.current / (reminderStatus.total || 1)) * 100}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          {reminderStatus.complete && (
+            <p className="mt-4 text-emerald-400 text-sm text-center font-medium animate-bounce">
+              ✨ ¡Recordatorios enviados con éxito!
+            </p>
+          )}
+        </div>
+
+        {/* Envío Masivo */}
+        <div className="bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-2xl p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center">
+              <Users className="w-6 h-6 text-emerald-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white">Recomendación Diaria</h3>
+              <p className="text-slate-400 text-sm">Envío masivo con IA</p>
+            </div>
+          </div>
+          <p className="text-slate-300 text-sm mb-6">La Inteligencia Artificial redactará una recomendación personalizada única para cada paciente basándose en sus hábitos actuales.</p>
+          
+          <button
+            onClick={handleBroadcast}
+            disabled={broadcastStatus.isBroadcasting}
+            className="w-full flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-all shadow-lg"
+          >
+            <MessageSquare className="w-5 h-5" /> Enviar a Todos
+          </button>
+
+          {broadcastStatus.isBroadcasting && (
+            <div className="mt-4 bg-slate-900/50 rounded-xl p-4 animate-pulse">
+              <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
+                <span>Procesando envíos...</span>
+                <span className="font-bold">{broadcastStatus.current} / {broadcastStatus.total}</span>
+              </div>
+              <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-emerald-500 transition-all duration-500"
+                  style={{ width: `${((broadcastStatus.current || 0) / (broadcastStatus.total || 1)) * 100}%` }}
+                />
+              </div>
+              {broadcastStatus.latest && (
+                <p className="text-[10px] text-slate-500 italic truncate mt-2">
+                  Último: {broadcastStatus.latest.patientName} - {broadcastStatus.latest.status === 'sent' ? '✅' : '❌'}
+                </p>
+              )}
+            </div>
+          )}
+
+          {broadcastStatus.complete && (
+            <p className="mt-4 text-emerald-400 text-sm text-center font-medium animate-bounce">
+              ✨ Envío masivo completado
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
 // COMPONENTE CITAS (CRUD)
 // ============================================================
 
@@ -548,13 +747,7 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
   const [editingId, setEditingId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   
-  const [reminderStatus, setReminderStatus] = useState({
-    isSending: false,
-    current: 0,
-    total: 0,
-    lastPatient: "",
-    complete: false
-  });
+
 
   const [form, setForm] = useState({
     profileId: "",
@@ -566,7 +759,7 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
 
   const fetchAppointments = async () => {
     try {
-      const res = await fetch("http://localhost:3001/api/appointments");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/appointments`);
       const data = await res.json();
       setAppointments(data);
     } catch (e) { console.error(e); }
@@ -575,7 +768,7 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
 
   const fetchProfiles = async () => {
     try {
-      const res = await fetch("http://localhost:3001/api/profiles");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/profiles`);
       const data = await res.json();
       setProfiles(data);
     } catch (e) { console.error(e); }
@@ -585,32 +778,7 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
     fetchAppointments();
     fetchProfiles();
 
-    // Sockets para recordatorios
-    const handleProgress = (data: any) => {
-      setReminderStatus(prev => ({
-        ...prev,
-        isSending: true,
-        current: data.current,
-        total: data.total,
-        lastPatient: data.lastPatient
-      }));
-    };
 
-    const handleComplete = (data: any) => {
-      setReminderStatus(prev => ({ ...prev, isSending: false, complete: true }));
-      setTimeout(() => setReminderStatus(p => ({ ...p, complete: false })), 5000);
-      fetchAppointments();
-    };
-
-    const socket = io("http://localhost:3001");
-    socket.on('appointment_reminder_progress', handleProgress);
-    socket.on('appointment_reminder_complete', handleComplete);
-
-    return () => {
-      socket.off('appointment_reminder_progress', handleProgress);
-      socket.off('appointment_reminder_complete', handleComplete);
-      socket.disconnect();
-    };
   }, []);
 
   useEffect(() => {
@@ -634,8 +802,8 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
     setSaving(true);
     try {
       const url = editingId 
-        ? `http://localhost:3001/api/appointments/${editingId}`
-        : "http://localhost:3001/api/appointments";
+        ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/appointments/${editingId}`
+        : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/appointments`;
       
       const res = await fetch(url, {
         method: editingId ? "PUT" : "POST",
@@ -669,32 +837,11 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
     setShowForm(true);
   };
 
-  const handleSendReminders = async () => {
-    if (!confirm("Se enviará un recordatorio por WhatsApp a todos los pacientes con citas PENDIENTES. ¿Continuar?")) return;
-    try {
-      const res = await fetch("http://localhost:3001/api/appointments/reminders", { method: "POST" });
-      const data = await res.json();
-      
-      if (res.status === 200 && data.message === "No hay citas pendientes para recordar") {
-        alert("No hay citas pendientes agendadas para enviar recordatorios.");
-        return;
-      }
 
-      if (res.ok) {
-        setReminderStatus({ isSending: true, current: 0, total: data.total, lastPatient: "", complete: false });
-      } else if (res.status === 503) {
-        alert("⚠️ WhatsApp no está conectado. Por favor, ve a la pestaña de 'WhatsApp', escanea el código QR y espera a que el estado sea 'Conectado' antes de enviar recordatorios.");
-      } else {
-        alert(data.error || "Error al iniciar recordatorios");
-      }
-    } catch (e) {
-      alert("Error de conexión");
-    }
-  };
 
   const handleUpdateStatus = async (id: number, newStatus: string) => {
     try {
-      const res = await fetch(`http://localhost:3001/api/appointments/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/appointments/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus })
@@ -708,7 +855,7 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
   const handleDelete = async (id: number) => {
     if (!confirm("¿Eliminar esta cita?")) return;
     try {
-      await fetch(`http://localhost:3001/api/appointments/${id}`, { method: "DELETE" });
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/appointments/${id}`, { method: "DELETE" });
       setAppointments(prev => prev.filter(a => a.id !== id));
     } catch (e) { alert("Error al eliminar"); }
   };
@@ -722,13 +869,6 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
         </div>
         <div className="flex items-center gap-3">
           <button
-            onClick={handleSendReminders}
-            disabled={reminderStatus.isSending}
-            className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 font-semibold px-5 py-3 rounded-xl transition-all shadow-lg"
-          >
-            <Bell className="w-5 h-5" /> Enviar Recordatorios
-          </button>
-          <button
             onClick={() => setShowForm(true)}
             className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold px-5 py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/30"
           >
@@ -737,35 +877,7 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
         </div>
       </div>
 
-      {/* Progress Bar para Recordatorios */}
-      {reminderStatus.isSending && (
-        <div className="mb-8 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-6 animate-pulse">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
-                <Bell className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-white font-bold">Enviando recordatorios...</p>
-                <p className="text-slate-400 text-xs">Recordando a: <span className="text-emerald-400">{reminderStatus.lastPatient}</span></p>
-              </div>
-            </div>
-            <span className="text-emerald-400 font-bold text-sm">{reminderStatus.current} / {reminderStatus.total}</span>
-          </div>
-          <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-emerald-500 transition-all duration-500" 
-              style={{ width: `${(reminderStatus.current / reminderStatus.total) * 100}%` }}
-            />
-          </div>
-        </div>
-      )}
 
-      {reminderStatus.complete && (
-        <div className="mb-8 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-center font-bold animate-bounce">
-          ✨ ¡Todos los recordatorios han sido enviados con éxito!
-        </div>
-      )}
 
       {showForm && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -975,7 +1087,7 @@ function CalendarSection({ onGoToAppointment }: { onGoToAppointment: (id: number
   const [selectedDayApps, setSelectedDayApps] = useState<Appointment[] | null>(null);
 
   useEffect(() => {
-    fetch("http://localhost:3001/api/appointments")
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/appointments`)
       .then(r => r.json())
       .then(setAppointments)
       .catch(console.error)

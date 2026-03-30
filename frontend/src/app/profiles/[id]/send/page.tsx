@@ -1,5 +1,6 @@
 "use client";
 
+import { apiFetch as fetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
@@ -24,12 +25,12 @@ export default function SendMessagePage() {
   const [sendStatus, setSendStatus] = useState<{ loading: boolean; success?: boolean; msg?: string }>({ loading: false });
 
   useEffect(() => {
-    fetch(`http://localhost:3001/api/profiles/${id}`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/profiles/${id}`)
       .then(r => r.json())
       .then(setProfile)
       .catch(console.error);
 
-    const s = io("http://localhost:3001");
+    const s = io(process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}`);
     setSocket(s);
 
     s.on("qr", (qr: string) => { setQrCode(qr); setWaStatus("qr"); });

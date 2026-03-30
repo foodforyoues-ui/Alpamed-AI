@@ -7,11 +7,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String?
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  profiles  Profile[] // Relación 1 a N: Un nutricionista tiene múltiples pacientes
+}
+
 model Profile {
   id                      Int                @id @default(autoincrement())
   patientName             String
   phone                   String             @unique
   realAge                 Int?
+  
+  // Relación con el nutricionista (Opcional temporalmente para no romper datos existentes)
+  userId                  Int?
+  user                    User?              @relation(fields: [userId], references: [id])
 
   // Hábitos (editables)
   doesExercise            Boolean            @default(false)

@@ -1,5 +1,6 @@
 "use client";
 
+import { apiFetch as fetch } from "@/lib/api";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -35,7 +36,7 @@ export default function NewProfilePage() {
       specificRecommendations: specificRecommendations.filter(r => r.trim()),
     };
     try {
-      const res = await fetch("http://localhost:3001/api/profiles", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/profiles`, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
       });
       if (!res.ok) { const err = await res.json(); throw new Error(err.error || "Error al crear perfil"); }

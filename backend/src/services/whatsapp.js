@@ -3,6 +3,7 @@
  * El servidor registra el cliente aquí, y el controlador de broadcast lo consume.
  */
 import pkg from 'whatsapp-web.js';
+import fs from 'fs';
 const { Client, LocalAuth } = pkg;
 
 let client = null;
@@ -82,4 +83,33 @@ export async function sendWhatsAppMessage(phone, text) {
         throw new Error(`El número ${phone} no está registrado en WhatsApp.`);
     }
     await client.sendMessage(numberId._serialized, text);
+}
+
+export async function logoutWhatsApp() {
+    if (client) {
+        console.log('Cerrando sesión de WhatsApp...');
+        try {
+            if (isReady) await client.logout();
+        } catch (e) {
+            console.error('Error al hacer logout en el cliente:', e.message);
+        }
+        try {
+            await client.destroy();
+        } catch (e) {
+            console.error('Error al destruir cliente:', e.message);
+        }
+        client = null;
+        isReady = false;
+    }
+    
+    if (fs.existsSync('./.wwebjs_auth')) {
+        try {
+            fs.rmSync('./.wwebjs_auth', { recursive: true, force: true });
+            console.log('Carpeta .wwebjs_auth eliminada correctamente.');
+        } catch (e) {
+            console.error('Error al borrar carpeta de sesión:', e.message);
+        }
+    }
+    
+    ioRef?.emit('disconnected', 'Cierre de sesión manual');
 }

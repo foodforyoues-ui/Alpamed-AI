@@ -3,22 +3,26 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import { generateTestMessage, generateMessageForProfile } from './src/services/ai.js';
-import { setIo, getClient, getIsReady, initWhatsApp, sendWhatsAppMessage } from './src/services/whatsapp.js';
+import { setIo, getClient, getIsReady, initWhatsApp, sendWhatsAppMessage, logoutWhatsApp } from './src/services/whatsapp.js';
 import prisma from './src/config/db.js';
 import profileRoutes from './src/routes/profile.routes.js';
 import snapshotRoutes from './src/routes/snapshot.routes.js';
 import messageRoutes from './src/routes/message.routes.js';
 import appointmentRoutes from './src/routes/appointment.routes.js';
+import authRoutes from './src/routes/auth.routes.js';
+import { requireAuth } from './src/middlewares/auth.middleware.js';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 // --- API REST ---
-app.use('/api/profiles', profileRoutes);
-app.use('/api/profiles/:id/snapshots', snapshotRoutes);
-app.use('/api/messages', messageRoutes);
-app.use('/api/appointments', appointmentRoutes);
+app.use('/api/auth', authRoutes); // Público
+
+app.use('/api/profiles', requireAuth, profileRoutes); // Protegido
+app.use('/api/profiles/:id/snapshots', requireAuth, snapshotRoutes); // Protegido
+app.use('/api/messages', requireAuth, messageRoutes); // Protegido
+app.use('/api/appointments', requireAuth, appointmentRoutes); // Protegido
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -94,15 +98,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('logout', async () => {
-        const client = getClient();
-        if (client && getIsReady()) {
-            try {
-                await client.logout();
-                socket.emit('disconnected', { reason: 'Log out manual' });
-            } catch (e) {
-                console.error(e);
-            }
-        }
+        await logoutWhatsApp();
     });
 
     socket.on('disconnect', () => {
