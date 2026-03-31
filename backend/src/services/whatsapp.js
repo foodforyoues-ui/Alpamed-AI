@@ -23,10 +23,13 @@ export function getIsReady() {
 }
 
 export function initWhatsApp() {
+    const execPath = process.env.PUPPETEER_EXECUTABLE_PATH;
+    const finalExecPath = execPath === '/nix/store/chromium' ? 'chromium' : (execPath || undefined);
+
     client = new Client({
         authStrategy: new LocalAuth({ dataPath: './.wwebjs_auth' }),
         puppeteer: {
-            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+            executablePath: finalExecPath,
             args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
         }
     });
