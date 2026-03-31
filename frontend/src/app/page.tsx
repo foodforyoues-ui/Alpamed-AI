@@ -836,11 +836,15 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
       const url = editingId 
         ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/appointments/${editingId}`
         : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/appointments`;
-      
+      const payload = {
+        ...form,
+        date: new Date(form.date).toISOString()
+      };
+
       const res = await fetch(url, {
         method: editingId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form)
+        body: JSON.stringify(payload)
       });
 
       if (res.ok) {
@@ -857,10 +861,16 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
     setShowForm(false);
   };
 
+  const toLocalDatetimeString = (dateStr: string) => {
+    const d = new Date(dateStr);
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
   const handleEdit = (app: Appointment) => {
     setForm({
       profileId: app.profileId.toString(),
-      date: new Date(app.date).toISOString().slice(0, 16),
+      date: toLocalDatetimeString(app.date),
       reason: app.reason,
       notes: app.notes || "",
       status: app.status
