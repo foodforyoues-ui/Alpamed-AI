@@ -7,6 +7,9 @@ export const apiFetch = async (url: string, options: RequestInit = {}) => {
     if (token) {
         headers.set('Authorization', `Bearer ${token}`);
     }
+    
+    // Ngrok bypass Header
+    headers.set('ngrok-skip-browser-warning', '69420');
 
     const config = {
         ...options,
