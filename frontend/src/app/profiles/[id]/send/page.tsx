@@ -31,7 +31,6 @@ export default function SendMessagePage() {
       .catch(console.error);
 
     const s = io(process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001", {
-      transports: ['websocket'],
       extraHeaders: { "ngrok-skip-browser-warning": "69420" }
     });
     setSocket(s);

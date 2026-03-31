@@ -357,7 +357,6 @@ function WhatsAppSection() {
   useEffect(() => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
     const newSocket = io(apiUrl, {
-      transports: ['websocket'],
       extraHeaders: { "ngrok-skip-browser-warning": "69420" }
     });
     setSocket(newSocket);
@@ -548,7 +547,6 @@ function MessagesSection() {
 
     const apiUrl2 = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
     const socket = io(apiUrl2, {
-      transports: ['websocket'],
       extraHeaders: { "ngrok-skip-browser-warning": "69420" }
     });
 
