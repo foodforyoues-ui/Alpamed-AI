@@ -355,7 +355,10 @@ function WhatsAppSection() {
 
 
   useEffect(() => {
-    const newSocket = io(process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}`);
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    const newSocket = io(apiUrl, {
+      extraHeaders: { "ngrok-skip-browser-warning": "69420" }
+    });
     setSocket(newSocket);
 
     newSocket.on("qr", (qr: string) => { setQrCode(qr); setStatus("qr"); });
@@ -542,7 +545,10 @@ function MessagesSection() {
       .then(setProfiles)
       .catch(console.error);
 
-    const socket = io(process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}`);
+    const apiUrl2 = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    const socket = io(apiUrl2, {
+      extraHeaders: { "ngrok-skip-browser-warning": "69420" }
+    });
 
     const handleBroadcastProgress = (data: any) => {
       setBroadcastStatus({ 

@@ -30,7 +30,9 @@ export default function SendMessagePage() {
       .then(setProfile)
       .catch(console.error);
 
-    const s = io(process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}`);
+    const s = io(process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001", {
+      extraHeaders: { "ngrok-skip-browser-warning": "69420" }
+    });
     setSocket(s);
 
     s.on("qr", (qr: string) => { setQrCode(qr); setWaStatus("qr"); });
