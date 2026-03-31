@@ -14,16 +14,25 @@ import { requireAuth } from './src/middlewares/auth.middleware.js';
 
 const app = express();
 
-// --- CORS Manual (más robusto en producción) ---
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, ngrok-skip-browser-warning');
-    if (req.method === 'OPTIONS') {
-        return res.sendStatus(200);
-    }
-    next();
-});
+// --- CORS Configuración ---
+const whitelist = [
+    'http://localhost:3000',
+    'https://nutria-rosy.vercel.app',
+    'https://nutria-git-main-walter-d3vs-projects.vercel.app'
+];
+
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin || whitelist.indexOf(origin) !== -1 || true) { // Temporalmente permitiendo todo, o true
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning'],
+    credentials: true,
+}));
 
 app.use(express.json());
 
@@ -39,8 +48,9 @@ app.use('/api/appointments', requireAuth, appointmentRoutes); // Protegido
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
     cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
+        origin: whitelist,
+        methods: ["GET", "POST"],
+        credentials: true
     }
 });
 
