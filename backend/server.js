@@ -22,7 +22,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // Preflight para todas las rutas
+app.options('/{*path}', cors(corsOptions)); // Preflight para todas las rutas (Express 5)
 app.use(express.json());
 
 
