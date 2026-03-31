@@ -597,9 +597,16 @@ function MessagesSection() {
     if (confirm("Se enviará un mensaje personalizado CON IA a todos los pacientes registrados. ¿Continuar?")) {
       setBroadcastStatus({ isBroadcasting: true, current: 0, total: profiles.length });
       try {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/messages/broadcast`, { method: "POST" });
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/messages/broadcast`, { method: "POST" });
+        const data = await res.json();
+        
+        if (!res.ok) {
+          alert(`⚠️ ${data.error || "Error al iniciar broadcast."}`);
+          setBroadcastStatus({ isBroadcasting: false });
+          return;
+        }
       } catch (e) {
-        alert("Error al iniciar broadcast.");
+        alert("Error de conexión al iniciar broadcast.");
         setBroadcastStatus({ isBroadcasting: false });
       }
     }
