@@ -4,6 +4,7 @@ import { apiFetch as fetch } from "@/lib/api";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Cookies from "js-cookie";
+import { motion, AnimatePresence } from "framer-motion";
 import { Users, Smartphone, Plus, Trash2, Edit3, MessageSquare, Activity, ChevronRight, Calendar, Clock, MapPin, MoreVertical, X, CheckCircle, XCircle, ChevronLeft, CalendarDays, Bell, Send, LogOut, Menu } from "lucide-react";
 
 interface Profile {
@@ -177,8 +178,13 @@ export default function Home() {
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto">
+          <AnimatePresence mode="wait">
           {view === "dashboard" && (
-            <div className="p-4 md:p-8">
+            <motion.div 
+              key="dashboard"
+              initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.3 }}
+              className="p-4 md:p-8"
+            >
               {/* Header */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
                 <div>
@@ -221,9 +227,13 @@ export default function Home() {
               {/* Grid */}
               {!loading && profiles.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                  {profiles.map((profile) => (
-                    <div
+                  {profiles.map((profile, i) => (
+                    <motion.div
                       key={profile.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: i * 0.05 }}
+                      whileHover={{ scale: 1.02 }}
                       className="bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-2xl p-5 hover:border-emerald-500/30 hover:bg-slate-800/80 transition-all group"
                     >
                       {/* Card Header */}
@@ -303,34 +313,43 @@ export default function Home() {
                           }
                         </button>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               )}
-            </div>
+            </motion.div>
           )}
 
           {view === "whatsapp" && (
-            <WhatsAppSection />
+            <motion.div key="whatsapp" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.3 }}>
+              <WhatsAppSection />
+            </motion.div>
           )}
 
           {view === "messages" && (
-            <MessagesSection />
+            <motion.div key="messages" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.3 }}>
+              <MessagesSection />
+            </motion.div>
           )}
 
           {view === "appointments" && (
-            <AppointmentsSection 
-              highlightId={highlightedAppointmentId} 
-              onClearHighlight={() => setHighlightedAppointmentId(null)} 
-            />
+            <motion.div key="appointments" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.3 }} className="h-full">
+              <AppointmentsSection 
+                highlightId={highlightedAppointmentId} 
+                onClearHighlight={() => setHighlightedAppointmentId(null)} 
+              />
+            </motion.div>
           )}
 
           {view === "calendar" && (
-            <CalendarSection onGoToAppointment={(id) => {
-              setHighlightedAppointmentId(id);
-              setView("appointments");
-            }} />
+            <motion.div key="calendar" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.3 }} className="h-full">
+              <CalendarSection onGoToAppointment={(id) => {
+                setHighlightedAppointmentId(id);
+                setView("appointments");
+              }} />
+            </motion.div>
           )}
+          </AnimatePresence>
         </main>
     </div>
   );
@@ -391,7 +410,7 @@ function WhatsAppSection() {
 
 
   return (
-    <div className="p-8 flex items-start justify-center">
+    <div className="p-4 sm:p-6 md:p-8 flex items-start justify-center">
       <div className="w-full max-w-lg">
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-white">WhatsApp</h2>
@@ -636,7 +655,7 @@ function MessagesSection() {
   };
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-white">Central de Mensajes</h2>
         <p className="text-slate-400 mt-1">Envía recordatorios de citas y recomendaciones masivas a tus pacientes</p>
@@ -874,16 +893,16 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
   };
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-4 sm:p-6 md:p-8 h-full">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
         <div>
           <h2 className="text-2xl font-bold text-white">Gestión de Citas</h2>
-          <p className="text-slate-400 mt-1">Programa y organiza las consultas de tus pacientes</p>
+          <p className="text-slate-400 mt-1">Programa y organiza las consultas</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
           <button
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold px-5 py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/30"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/30 text-sm sm:text-base"
           >
             <Plus className="w-5 h-5" /> Nueva Cita
           </button>
@@ -1157,7 +1176,7 @@ function CalendarSection({ onGoToAppointment }: { onGoToAppointment: (id: number
   );
 
   return (
-    <div className="p-8 h-full flex flex-col">
+    <div className="p-4 sm:p-6 md:p-8 h-full flex flex-col">
       {/* Header del Calendario */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
@@ -1185,9 +1204,9 @@ function CalendarSection({ onGoToAppointment }: { onGoToAppointment: (id: number
             <p className="text-slate-400 text-sm">Navega rápidamente por tu agenda</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 bg-slate-800/50 p-1.5 rounded-xl border border-slate-700/50 shadow-inner">
+        <div className="flex items-center gap-2 bg-slate-800/50 p-1.5 rounded-xl border border-slate-700/50 shadow-inner overflow-x-auto w-full sm:w-auto justify-between">
           <button onClick={prevMonth} className="p-2 hover:bg-slate-700 text-slate-300 rounded-lg transition-all"><ChevronLeft className="w-5 h-5" /></button>
-          <button onClick={goToToday} className="px-4 py-2 text-xs font-bold text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all">HOY</button>
+          <button onClick={goToToday} className="px-4 py-2 text-xs font-bold text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all whitespace-nowrap">HOY</button>
           <button onClick={nextMonth} className="p-2 hover:bg-slate-700 text-slate-300 rounded-lg transition-all"><ChevronRight className="w-5 h-5" /></button>
         </div>
       </div>
