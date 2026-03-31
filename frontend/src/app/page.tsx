@@ -1178,36 +1178,41 @@ function CalendarSection({ onGoToAppointment }: { onGoToAppointment: (id: number
   return (
     <div className="p-4 sm:p-6 md:p-8 h-full flex flex-col">
       {/* Header del Calendario */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <select 
-                value={month}
-                onChange={(e) => handleMonthChange(parseInt(e.target.value))}
-                className="bg-transparent text-2xl font-bold text-white capitalize outline-none cursor-pointer hover:text-emerald-400 transition-colors appearance-none"
-              >
-                {months.map((m, i) => (
-                  <option key={m} value={i} className="bg-slate-900 text-base">{m}</option>
-                ))}
-              </select>
-              <select 
-                value={year}
-                onChange={(e) => handleYearChange(parseInt(e.target.value))}
-                className="bg-transparent text-2xl font-medium text-slate-500 outline-none cursor-pointer hover:text-emerald-400 transition-colors appearance-none"
-              >
-                {years.map(y => (
-                  <option key={y} value={y} className="bg-slate-900 text-base">{y}</option>
-                ))}
-              </select>
-            </div>
-            <p className="text-slate-400 text-sm">Navega rápidamente por tu agenda</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8 bg-slate-800/30 p-5 sm:p-4 rounded-3xl border border-slate-700/30 shadow-inner">
+        <div className="flex flex-col">
+          <div className="flex flex-wrap items-center gap-2 mb-1">
+            <select 
+              value={month}
+              onChange={(e) => handleMonthChange(parseInt(e.target.value))}
+              className="bg-transparent text-3xl font-bold text-emerald-400 capitalize outline-none cursor-pointer hover:text-emerald-300 transition-colors appearance-none"
+            >
+              {months.map((m, i) => (
+                <option key={m} value={i} className="bg-slate-900 text-base text-white">{m}</option>
+              ))}
+            </select>
+            <select 
+              value={year}
+              onChange={(e) => handleYearChange(parseInt(e.target.value))}
+              className="bg-transparent text-3xl font-medium text-slate-300 outline-none cursor-pointer hover:text-white transition-colors appearance-none"
+            >
+              {years.map(y => (
+                <option key={y} value={y} className="bg-slate-900 text-base text-white">{y}</option>
+              ))}
+            </select>
           </div>
+          <p className="text-slate-400 text-sm">Navega rápidamente por tu agenda</p>
         </div>
-        <div className="flex items-center gap-2 bg-slate-800/50 p-1.5 rounded-xl border border-slate-700/50 shadow-inner overflow-x-auto w-full sm:w-auto justify-between">
-          <button onClick={prevMonth} className="p-2 hover:bg-slate-700 text-slate-300 rounded-lg transition-all"><ChevronLeft className="w-5 h-5" /></button>
-          <button onClick={goToToday} className="px-4 py-2 text-xs font-bold text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all whitespace-nowrap">HOY</button>
-          <button onClick={nextMonth} className="p-2 hover:bg-slate-700 text-slate-300 rounded-lg transition-all"><ChevronRight className="w-5 h-5" /></button>
+        
+        <div className="flex items-center justify-between bg-slate-900/80 p-1.5 rounded-2xl border border-slate-700/50 shadow-lg w-full sm:w-auto">
+          <button onClick={prevMonth} className="p-3 sm:p-2.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl transition-all group">
+            <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+          </button>
+          <button onClick={goToToday} className="flex-1 sm:flex-none px-6 py-2.5 mx-2 text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-400 rounded-xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95">
+            HOY
+          </button>
+          <button onClick={nextMonth} className="p-3 sm:p-2.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl transition-all group">
+            <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </button>
         </div>
       </div>
 
