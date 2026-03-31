@@ -1099,7 +1099,7 @@ function StatusBadge({ status }: { status: string }) {
     pendiente: "bg-amber-500/20 text-amber-500 border-amber-500/30",
     completada: "bg-emerald-500/20 text-emerald-500 border-emerald-500/30",
     cancelada: "bg-red-500/20 text-red-500 border-red-500/30",
-    caducada: "bg-slate-500/20 text-slate-500 border-slate-500/30",
+    caducada: "bg-rose-500/20 text-rose-500 border-rose-500/30",
   };
   return (
     <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded-full border ${styles[status]}`}>
@@ -1243,22 +1243,16 @@ function CalendarSection({ onGoToAppointment }: { onGoToAppointment: (id: number
                   {date.getDate()}
                 </span>
                 
-                <div className="mt-1 space-y-1 overflow-hidden h-[calc(100%-24px)] flex flex-col justify-start">
-                  {dayApps.map(app => (
-                    <div key={app.id} className={`text-[9px] px-1.5 py-0.5 rounded border flex items-center gap-1 truncate ${
-                      app.status === 'completada' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
-                      app.status === 'cancelada' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                      app.status === 'caducada' ? 'bg-slate-700/50 text-slate-500 border-slate-700/50 opacity-60' :
-                      'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                    }`}>
-                      <span className="font-bold opacity-70">
-                        {new Date(app.date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                      {app.profile.patientName}
-                    </div>
-                  ))}
+                <div className="mt-2 flex flex-wrap justify-center sm:justify-start gap-1.5 items-center px-1">
+                  {dayApps.slice(0, 4).map(app => {
+                    const dotColor = app.status === 'completada' ? 'bg-emerald-500' : 
+                                     app.status === 'cancelada' ? 'bg-red-500' :
+                                     app.status === 'caducada' ? 'bg-rose-500' :
+                                     'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]';
+                    return <div key={app.id} className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${dotColor}`} />
+                  })}
                   {dayApps.length > 4 && (
-                    <div className="text-[8px] text-slate-500 text-center font-medium">+{dayApps.length - 4} más</div>
+                    <span className="text-[9px] text-slate-500 font-bold">+{dayApps.length - 4}</span>
                   )}
                 </div>
               </div>
