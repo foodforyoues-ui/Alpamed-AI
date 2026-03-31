@@ -14,15 +14,17 @@ import { requireAuth } from './src/middlewares/auth.middleware.js';
 
 const app = express();
 
-const corsOptions = {
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning'],
-    credentials: false,
-};
+// --- CORS Manual (más robusto en producción) ---
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, ngrok-skip-browser-warning');
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    next();
+});
 
-app.use(cors(corsOptions));
-app.options('/{*path}', cors(corsOptions)); // Preflight para todas las rutas (Express 5)
 app.use(express.json());
 
 
