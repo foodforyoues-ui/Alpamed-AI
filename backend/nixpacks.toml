@@ -1,38 +1,5 @@
-# Railway/Nixpacks config — installs Chrome dependencies for whatsapp-web.js
+[providers.node]
+nodeVersion = "22"
+
 [phases.setup]
-nixPkgs = [
-  "chromium",
-  "nss",
-  "xorg.libX11",
-  "xorg.libXcomposite",
-  "xorg.libXcursor",
-  "xorg.libXdamage",
-  "xorg.libXext",
-  "xorg.libXfixes",
-  "xorg.libXi",
-  "xorg.libXrandr",
-  "xorg.libXrender",
-  "xorg.libXtst",
-  "xorg.libxcb",
-  "xorg.libXScrnSaver",
-  "alsa-lib",
-  "atk",
-  "at-spi2-atk",
-  "at-spi2-core",
-  "cups",
-  "dbus",
-  "gdk-pixbuf",
-  "glib",
-  "gtk3",
-  "libdrm",
-  "libxkbcommon",
-  "mesa",
-  "nspr",
-  "pango"
-]
-
-[phases.build]
-cmds = ["npm install", "npx prisma generate"]
-
-[start]
-cmd = "node server.js"
+nixPkgs = ["...", "chromium", "nss", "freetype", "harfbuzz", "pango"]
