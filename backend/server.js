@@ -13,8 +13,18 @@ import authRoutes from './src/routes/auth.routes.js';
 import { requireAuth } from './src/middlewares/auth.middleware.js';
 
 const app = express();
-app.use(cors());
+
+const corsOptions = {
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning'],
+    credentials: false,
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Preflight para todas las rutas
 app.use(express.json());
+
 
 // --- API REST ---
 app.use('/api/auth', authRoutes); // Público
