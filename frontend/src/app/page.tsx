@@ -1243,28 +1243,35 @@ function CalendarSection({ onGoToAppointment }: { onGoToAppointment: (id: number
             const isToday = date.toDateString() === new Date().toDateString();
             const dayApps = getAppsForDay(date);
 
+            let dayStatus = null;
+            if (dayApps.length > 0) {
+              if (dayApps.some(a => a.status === 'pendiente')) dayStatus = 'pendiente';
+              else if (dayApps.some(a => a.status === 'caducada')) dayStatus = 'caducada';
+              else if (dayApps.some(a => a.status === 'completada')) dayStatus = 'completada';
+              else dayStatus = 'cancelada';
+            }
+
+            let cellStyles = isToday ? 'bg-emerald-500/10' : 'hover:bg-slate-800/50';
+            if (dayStatus === 'pendiente') cellStyles = 'bg-amber-500/20 border-amber-500/40 hover:bg-amber-500/30 shadow-[inset_0_0_15px_rgba(245,158,11,0.15)]';
+            else if (dayStatus === 'caducada') cellStyles = 'bg-rose-500/20 border-rose-500/40 hover:bg-rose-500/30';
+            else if (dayStatus === 'completada') cellStyles = 'bg-emerald-500/20 border-emerald-500/40 hover:bg-emerald-500/30';
+            else if (dayStatus === 'cancelada') cellStyles = 'bg-slate-800/80 border-slate-700 hover:bg-slate-700';
+
             return (
               <div 
                 key={date.toISOString()} 
                 onClick={() => dayApps.length > 0 && setSelectedDayApps(dayApps)}
-                className={`border-b border-r border-slate-800 p-2 transition-all hover:bg-emerald-500/5 group cursor-pointer relative ${isToday ? 'bg-emerald-500/5' : ''}`}
+                className={`border-b border-r border-slate-800 p-2 transition-all cursor-pointer flex items-center justify-center ${cellStyles}`}
               >
-                <span className={`text-xs font-bold ${isToday ? 'text-emerald-400 bg-emerald-500/20 w-6 h-6 rounded-full flex items-center justify-center' : 'text-slate-500 group-hover:text-slate-300'}`}>
+                <span className={`text-lg font-bold ${
+                  isToday && !dayStatus ? 'text-white bg-emerald-500 w-8 h-8 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/40' : 
+                  dayStatus === 'pendiente' ? 'text-amber-400' :
+                  dayStatus === 'caducada' ? 'text-rose-400' :
+                  dayStatus === 'completada' ? 'text-emerald-400' :
+                  'text-slate-400'
+                }`}>
                   {date.getDate()}
                 </span>
-                
-                <div className="mt-2 flex flex-wrap justify-center sm:justify-start gap-1.5 items-center px-1">
-                  {dayApps.slice(0, 4).map(app => {
-                    const dotColor = app.status === 'completada' ? 'bg-emerald-500' : 
-                                     app.status === 'cancelada' ? 'bg-red-500' :
-                                     app.status === 'caducada' ? 'bg-rose-500' :
-                                     'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]';
-                    return <div key={app.id} className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${dotColor}`} />
-                  })}
-                  {dayApps.length > 4 && (
-                    <span className="text-[9px] text-slate-500 font-bold">+{dayApps.length - 4}</span>
-                  )}
-                </div>
               </div>
             );
           })}
