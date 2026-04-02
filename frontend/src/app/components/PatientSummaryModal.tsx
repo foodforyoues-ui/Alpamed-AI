@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, TrendingDown, TrendingUp, Activity, User, Target, Scale, Zap, Info, Calendar } from 'lucide-react';
+import { X, TrendingDown, TrendingUp, Activity, User, Target, Scale, Zap, Info, Calendar, Printer } from 'lucide-react';
 import { 
   LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend 
 } from 'recharts';
@@ -66,6 +66,10 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
     return (initialSnapshot.weight || 0) - (latestSnapshot.weight || 0);
   }, [latestSnapshot, initialSnapshot]);
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -73,7 +77,7 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
         <motion.div 
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
+          className="absolute inset-0 bg-slate-950/80 backdrop-blur-md print:hidden"
         />
 
         {/* Modal */}
@@ -81,10 +85,10 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-5xl bg-slate-900/90 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl overflow-y-auto max-h-[90vh]"
+          className="relative w-full max-w-5xl bg-slate-900/90 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl overflow-y-auto max-h-[90vh] print:max-h-none print:shadow-none print:border-none print:w-full print:bg-white print:m-0 print:absolute print:inset-0"
         >
           {/* Header */}
-          <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-gradient-to-r from-emerald-500/10 to-teal-500/10">
+          <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-gradient-to-r from-emerald-500/10 to-teal-500/10 print:hidden">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
                 <User className="w-6 h-6 text-white" />
@@ -96,15 +100,93 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
                 </p>
               </div>
             </div>
-            <button 
-              onClick={onClose}
-              className="p-2 hover:bg-slate-800 rounded-xl transition-all text-slate-400 hover:text-white"
-            >
-              <X className="w-6 h-6" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={handlePrint}
+                className="flex items-center gap-2 bg-slate-800 text-white font-semibold px-4 py-2.5 rounded-xl hover:bg-slate-700 transition-all border border-slate-700"
+              >
+                <Printer className="w-5 h-5" /> Imprimir Reporte
+              </button>
+              <button 
+                onClick={onClose}
+                className="p-2 hover:bg-slate-800 rounded-xl transition-all text-slate-400 hover:text-white"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
           </div>
 
-          <div className="p-6 space-y-8">
+          {/* Printable Content (Visible only during print) */}
+          <div className="hidden print:block print-content p-10 text-slate-900 bg-white min-h-screen">
+            <div className="flex justify-between items-start border-b-2 border-slate-900 pb-6 mb-8 mt-4">
+              <div>
+                <h1 className="text-3xl font-black uppercase tracking-tight">Reporte de Paciente</h1>
+                <p className="text-lg font-bold text-slate-600 mt-1">Plataforma Nutria — Seguimiento Profesional</p>
+              </div>
+              <div className="text-right">
+                <p className="font-bold">Fecha de Reporte:</p>
+                <p>{new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-10 mb-10">
+              <div className="space-y-4">
+                <h3 className="font-bold border-b border-slate-200 pb-1 uppercase text-sm">Datos del Expediente</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <p className="font-bold">Nombre:</p> <p>{profile.patientName}</p>
+                  <p className="font-bold">Teléfono:</p> <p>{profile.phone}</p>
+                  <p className="font-bold">Edad:</p> <p>{profile.realAge} años</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <h3 className="font-bold border-b border-slate-200 pb-1 uppercase text-sm">Hábitos Declarados</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <p className="font-bold">Ejercicio:</p> <p>{profile.doesExercise ? profile.exerciseType : 'No realiza'}</p>
+                  <p className="font-bold">Pasos Diarios:</p> <p>{profile.dailySteps?.toLocaleString() || '--'}</p>
+                  <p className="font-bold">Sueño:</p> <p>{profile.sleepHours} h/promedio</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-10">
+              <h3 className="font-bold border-b border-slate-200 pb-1 mb-4 uppercase text-sm">Últimas Mediciones</h3>
+              <table className="w-full text-left text-sm border-collapse">
+                <thead>
+                  <tr className="bg-slate-100 uppercase text-[10px] tracking-widest font-black">
+                    <th className="p-3 border">Fecha</th>
+                    <th className="p-3 border">Peso (kg)</th>
+                    <th className="p-3 border">Grasa (%)</th>
+                    <th className="p-3 border">Músculo (%)</th>
+                    <th className="p-3 border">Edad Metab.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {profile.snapshots.slice(0, 10).map(s => (
+                    <tr key={s.id} className="border-b">
+                      <td className="p-3 border">{new Date(s.recordedAt).toLocaleDateString()}</td>
+                      <td className="p-3 border font-bold">{s.weight}</td>
+                      <td className="p-3 border">{s.bodyFatPercentage || '--'}</td>
+                      <td className="p-3 border">{s.muscleMassPercentage || '--'}</td>
+                      <td className="p-3 border">{s.metabolicAge || '--'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {profile.generalRecommendation && (
+              <div className="bg-slate-50 border border-slate-200 p-6 rounded-xl mb-10">
+                <h3 className="font-bold uppercase text-xs mb-3">Recomendación General del Nutricionista</h3>
+                <p className="text-sm italic leading-relaxed">{profile.generalRecommendation}</p>
+              </div>
+            )}
+
+            <div className="mt-auto pt-10 text-center text-[10px] text-slate-400 border-t border-slate-100">
+              Este reporte es para uso clínico exclusivo y se genera automáticamente desde la Plataforma Nutria.
+            </div>
+          </div>
+
+          <div className="p-6 space-y-8 print:hidden">
             {/* Main Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <MetricCard 
@@ -118,7 +200,6 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
                 label="IMC" 
                 value={latestSnapshot?.bmi?.toFixed(1) || '--'} 
                 icon={<Zap className="w-5 h-5" />}
-                badge={getIMCCategory(latestSnapshot?.bmi || 0)}
               />
               <MetricCard 
                 label="Grasa Corporal" 
@@ -199,7 +280,7 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
             </div>
 
             {/* Bottom Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
               <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-6">
                 <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
                   <Info className="w-5 h-5 text-slate-400" /> Detalles Complementarios
@@ -235,6 +316,23 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
           </div>
         </motion.div>
       </div>
+
+      <style jsx global>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          .print-content, .print-content * {
+            visibility: visible;
+          }
+          .print-content {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+          }
+        }
+      `}</style>
     </AnimatePresence>
   );
 }
@@ -264,12 +362,4 @@ function MetricCard({ label, value, icon, trend, trendColor = 'text-slate-400', 
       </div>
     </div>
   );
-}
-
-function getIMCCategory(bmi: number) {
-  if (bmi === 0) return null;
-  if (bmi < 18.5) return 'Bajo Peso';
-  if (bmi < 25) return 'Normal';
-  if (bmi < 30) return 'Sobrepeso';
-  return 'Obesidad';
 }
