@@ -76,8 +76,10 @@ export default function Home() {
   const fetchProfiles = async () => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/profiles`);
-      const data = await res.json();
-      setProfiles(data);
+      if (res.ok) {
+        const data = await res.json();
+        setProfiles(data);
+      }
     } catch (e) {
       console.error("Error al obtener perfiles:", e);
     } finally {

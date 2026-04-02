@@ -19,6 +19,9 @@ export const apiFetch = async (url: string, options: RequestInit = {}) => {
     const response = await fetch(url, config);
 
     if (response.status === 401) {
+        // Eliminar la cookie primero para evitar bucles de redirección
+        Cookies.remove('token');
+        
         // Redirigir al login si el token expira o es inválido
         if (typeof window !== 'undefined') {
             window.location.href = '/login';
