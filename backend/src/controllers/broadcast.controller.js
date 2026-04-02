@@ -59,52 +59,72 @@ async function processBroadcast(profiles, io) {
     console.log(`\n🚀 Iniciando broadcast de mensajes a ${profiles.length} pacientes...`);
 
     const results = [];
+    const BATCH_SIZE = 5; // Generar 5 mensajes de IA en paralelo
 
-    for (const profile of profiles) {
-        let text = null;
-        let status = 'failed';
-        let errorMsg = null;
+    for (let i = 0; i < profiles.length; i += BATCH_SIZE) {
+        const batch = profiles.slice(i, i + BATCH_SIZE);
+        
+        // Generar mensajes de IA en paralelo para el lote actual
+        const batchPromises = batch.map(async (profile) => {
+            let text = null;
+            let status = 'failed';
+            let errorMsg = null;
 
-        try {
-            // Generar mensaje personalizado con el expediente del paciente
-            text = await generateMessageForProfile(profile);
-            console.log(`\n📱 [${profile.patientName}] Mensaje generado → Enviando...`);
-
-            // Enviar por WhatsApp
-            await sendWhatsAppMessage(profile.phone, text);
-            status = 'sent';
-
-            console.log(`✅ [${profile.patientName}] Enviado correctamente.`);
-        } catch (err) {
-            errorMsg = err.message;
-            console.error(`❌ [${profile.patientName}] Error: ${err.message}`);
-        }
-
-        // Guardar en historial
-        if (text) {
-            await prisma.messageLog.create({
-                data: { profileId: profile.id, content: text, status }
-            }).catch(err => console.error('Error al guardar log:', err));
-        }
-
-        const resultEntry = {
-            profileId: profile.id,
-            patientName: profile.patientName,
-            phone: profile.phone,
-            status,
-            error: errorMsg,
-        };
-        results.push(resultEntry);
-
-        // Emitir progreso via WebSocket
-        io?.emit('broadcast_progress', {
-            current: results.length,
-            total: profiles.length,
-            latest: resultEntry,
+            try {
+                // Generar mensaje personalizado con el expediente del paciente
+                text = await generateMessageForProfile(profile);
+                return { profile, text, status: 'pending', errorMsg };
+            } catch (err) {
+                console.error(`❌ [${profile.patientName}] Error IA: ${err.message}`);
+                return { profile, text: null, status: 'failed', errorMsg: err.message };
+            }
         });
 
-        // Pequeña pausa entre mensajes para evitar bloqueos de WhatsApp
-        await new Promise(r => setTimeout(r, 1500));
+        const batchResults = await Promise.all(batchPromises);
+
+        // Enviar los mensajes del lote secuencialmente por WhatsApp (con pequeño delay)
+        for (const item of batchResults) {
+            const { profile, text, errorMsg } = item;
+            let currentStatus = item.status;
+            let currentError = errorMsg;
+
+            if (text) {
+                try {
+                    console.log(`\n📱 [${profile.patientName}] Enviando WhatsApp...`);
+                    await sendWhatsAppMessage(profile.phone, text);
+                    currentStatus = 'sent';
+                    console.log(`✅ [${profile.patientName}] Enviado correctamente.`);
+                } catch (err) {
+                    currentStatus = 'failed';
+                    currentError = err.message;
+                    console.error(`❌ [${profile.patientName}] Error WhatsApp: ${err.message}`);
+                }
+
+                // Guardar en historial
+                await prisma.messageLog.create({
+                    data: { profileId: profile.id, content: text, status: currentStatus }
+                }).catch(err => console.error('Error al guardar log:', err));
+            }
+
+            const resultEntry = {
+                profileId: profile.id,
+                patientName: profile.patientName,
+                phone: profile.phone,
+                status: currentStatus,
+                error: currentError,
+            };
+            results.push(resultEntry);
+
+            // Emitir progreso via WebSocket
+            io?.emit('broadcast_progress', {
+                current: results.length,
+                total: profiles.length,
+                latest: resultEntry,
+            });
+
+            // Delay mínimo entre envíos físicos de WhatsApp (800ms - 1.2s es seguro)
+            await new Promise(r => setTimeout(r, 1000));
+        }
     }
 
     // Emitir resultado final

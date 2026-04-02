@@ -118,34 +118,59 @@ export const sendAppointmentReminders = async (req, res) => {
 
     // Procesar en segundo plano
     (async () => {
+      let processedCount = 0;
       let sentCount = 0;
       let failedCount = 0;
+      const BATCH_SIZE = 5;
+      
       console.log(`Iniciando envío de ${pendingAppointments.length} recordatorios...`);
 
-      for (const app of pendingAppointments) {
-        try {
-          console.log(`Generando recordatorio para: ${app.profile.patientName}...`);
-          const text = await generateAppointmentReminder(app.profile, app);
-          
-          console.log(`Enviando a ${app.profile.phone}...`);
-          await sendWhatsAppMessage(app.profile.phone, text);
-          
-          sentCount++;
-          console.log(`✅ Enviado con éxito a ${app.profile.patientName}`);
-        } catch (err) {
-          console.error(`❌ Error en recordatorio para ${app.profile.patientName}:`, err.message);
-          failedCount++;
-        }
-
-        io.emit('appointment_reminder_progress', {
-          current: sentCount + failedCount,
-          total: pendingAppointments.length,
-          lastPatient: app.profile.patientName,
-          success: true
+      for (let i = 0; i < pendingAppointments.length; i += BATCH_SIZE) {
+        const batch = pendingAppointments.slice(i, i + BATCH_SIZE);
+        
+        // Generar mensajes de IA en paralelo para el lote
+        const batchPromises = batch.map(async (app) => {
+          try {
+            console.log(`Generando recordatorio IA para: ${app.profile.patientName}...`);
+            const text = await generateAppointmentReminder(app.profile, app);
+            return { app, text, error: null };
+          } catch (err) {
+            console.error(`❌ Error IA para ${app.profile.patientName}:`, err.message);
+            return { app, text: null, error: err.message };
+          }
         });
 
-        // Retraso de 2 segundos entre envíos
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        const batchResults = await Promise.all(batchPromises);
+
+        // Enviar por WhatsApp con delay
+        for (const item of batchResults) {
+          const { app, text, error } = item;
+          
+          if (text) {
+            try {
+              console.log(`Enviando WhatsApp a ${app.profile.phone}...`);
+              await sendWhatsAppMessage(app.profile.phone, text);
+              sentCount++;
+              console.log(`✅ Enviado con éxito a ${app.profile.patientName}`);
+            } catch (err) {
+              console.error(`❌ Error WhatsApp para ${app.profile.patientName}:`, err.message);
+              failedCount++;
+            }
+          } else {
+            failedCount++;
+          }
+
+          processedCount++;
+          io.emit('appointment_reminder_progress', {
+            current: processedCount,
+            total: pendingAppointments.length,
+            lastPatient: app.profile.patientName,
+            success: !error
+          });
+
+          // Delay de 1 segundo entre envíos físicos
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
       }
 
       console.log(`Envío completado. Éxito: ${sentCount}, Fallos: ${failedCount}`);

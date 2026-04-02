@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Cookies from "js-cookie";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Smartphone, Plus, Trash2, Edit3, MessageSquare, Activity, ChevronRight, Calendar, Clock, MapPin, MoreVertical, X, CheckCircle, XCircle, ChevronLeft, CalendarDays, Bell, Send, LogOut, Menu, UserPlus, Shield, Eye, EyeOff } from "lucide-react";
+import { Users, Smartphone, Plus, Trash2, Edit3, MessageSquare, Activity, ChevronRight, Calendar, Clock, MapPin, MoreVertical, X, CheckCircle, XCircle, ChevronLeft, CalendarDays, Bell, Send, LogOut, Menu, UserPlus, Shield, Eye, EyeOff, Search } from "lucide-react";
 
 interface Profile {
   id: number;
@@ -30,6 +30,7 @@ export default function Home() {
   const [deleting, setDeleting] = useState<number | null>(null);
   const [highlightedAppointmentId, setHighlightedAppointmentId] = useState<number | null>(null);
   const [filter, setFilter] = useState<"all" | "active" | "inactive">("active");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleToggleActive = async (profile: Profile) => {
     try {
@@ -48,9 +49,9 @@ export default function Home() {
   };
 
   const filteredProfiles = profiles.filter(p => {
-    if (filter === "active") return p.active;
-    if (filter === "inactive") return !p.active;
-    return true;
+    const matchesFilter = filter === "all" || (filter === "active" ? p.active : !p.active);
+    const matchesSearch = p.patientName.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesFilter && matchesSearch;
   });
 
   const fetchProfiles = async () => {
@@ -235,20 +236,35 @@ export default function Home() {
                 </Link>
               </div>
 
-              {/* Filters */}
+              {/* Filters & Search */}
               {!loading && profiles.length > 0 && (
-                <div className="flex gap-2 mb-6 bg-slate-800/40 p-1 rounded-xl border border-slate-700/50 w-fit">
-                  {(["active", "inactive", "all"] as const).map(f => (
-                    <button
-                      key={f}
-                      onClick={() => setFilter(f)}
-                      className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${
-                        filter === f ? "bg-slate-700 text-white shadow-sm" : "text-slate-500 hover:text-slate-300"
-                      }`}
-                    >
-                      {f === "active" ? "Activos" : f === "inactive" ? "Inactivos" : "Todos"}
-                    </button>
-                  ))}
+                <div className="flex flex-col md:flex-row gap-4 mb-8 items-start md:items-center justify-between">
+                  {/* Status Tabs */}
+                  <div className="flex gap-1 bg-slate-800/40 p-1 rounded-xl border border-slate-700/50 w-fit">
+                    {(["active", "inactive", "all"] as const).map(f => (
+                      <button
+                        key={f}
+                        onClick={() => setFilter(f)}
+                        className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${
+                          filter === f ? "bg-slate-700 text-white shadow-sm" : "text-slate-500 hover:text-slate-300"
+                        }`}
+                      >
+                        {f === "active" ? "Activos" : f === "inactive" ? "Inactivos" : "Todos"}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Search Bar */}
+                  <div className="relative w-full md:w-72">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <input
+                      type="text"
+                      placeholder="Buscar paciente por nombre..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full bg-slate-800/60 border border-slate-700/50 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all"
+                    />
+                  </div>
                 </div>
               )}
 
