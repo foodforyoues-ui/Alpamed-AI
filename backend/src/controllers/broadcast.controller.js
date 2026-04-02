@@ -35,8 +35,11 @@ export async function broadcastMessages(req, res) {
         });
     }
 
-    // Obtener todos los perfiles
-    const profiles = await prisma.profile.findMany({ orderBy: { patientName: 'asc' } });
+    // Obtener todos los perfiles activos
+    const profiles = await prisma.profile.findMany({ 
+        where: { active: true },
+        orderBy: { patientName: 'asc' } 
+    });
 
     if (profiles.length === 0) {
         return res.status(400).json({ error: 'No hay pacientes registrados.' });

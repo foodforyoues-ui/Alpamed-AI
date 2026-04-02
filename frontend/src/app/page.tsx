@@ -18,6 +18,7 @@ interface Profile {
   metabolicAge: number | null;
   realAge: number | null;
   createdAt: string;
+  active: boolean;
   _count?: { messages: number };
 }
 
@@ -28,6 +29,29 @@ export default function Home() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [deleting, setDeleting] = useState<number | null>(null);
   const [highlightedAppointmentId, setHighlightedAppointmentId] = useState<number | null>(null);
+  const [filter, setFilter] = useState<"all" | "active" | "inactive">("active");
+
+  const handleToggleActive = async (profile: Profile) => {
+    try {
+      const newStatus = !profile.active;
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/profiles/${profile.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ active: newStatus }),
+      });
+      if (res.ok) {
+        setProfiles(prev => prev.map(p => p.id === profile.id ? { ...p, active: newStatus } : p));
+      }
+    } catch (e) {
+      console.error("Error al cambiar estado:", e);
+    }
+  };
+
+  const filteredProfiles = profiles.filter(p => {
+    if (filter === "active") return p.active;
+    if (filter === "inactive") return !p.active;
+    return true;
+  });
 
   const fetchProfiles = async () => {
     try {
@@ -211,6 +235,23 @@ export default function Home() {
                 </Link>
               </div>
 
+              {/* Filters */}
+              {!loading && profiles.length > 0 && (
+                <div className="flex gap-2 mb-6 bg-slate-800/40 p-1 rounded-xl border border-slate-700/50 w-fit">
+                  {(["active", "inactive", "all"] as const).map(f => (
+                    <button
+                      key={f}
+                      onClick={() => setFilter(f)}
+                      className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${
+                        filter === f ? "bg-slate-700 text-white shadow-sm" : "text-slate-500 hover:text-slate-300"
+                      }`}
+                    >
+                      {f === "active" ? "Activos" : f === "inactive" ? "Inactivos" : "Todos"}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {/* Loading */}
               {loading && (
                 <div className="flex items-center justify-center py-24">
@@ -236,9 +277,9 @@ export default function Home() {
               )}
 
               {/* Grid */}
-              {!loading && profiles.length > 0 && (
+              {!loading && filteredProfiles.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                  {profiles.map((profile, i) => (
+                  {filteredProfiles.map((profile, i) => (
                     <motion.div
                       key={profile.id}
                       initial={{ opacity: 0, y: 20 }}
@@ -256,10 +297,26 @@ export default function Home() {
                             </span>
                           </div>
                           <div>
-                            <h3 className="text-white font-semibold">{profile.patientName}</h3>
-                            <p className="text-slate-400 text-sm">+{profile.phone}</p>
+                            <h3 className={`font-semibold ${profile.active ? 'text-white' : 'text-slate-500 line-through'}`}>{profile.patientName}</h3>
+                            <div className="flex items-center gap-2">
+                              <p className="text-slate-400 text-sm">+{profile.phone}</p>
+                              {!profile.active && (
+                                <span className="text-[10px] bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded uppercase font-bold tracking-wider">Inactivo</span>
+                              )}
+                            </div>
                           </div>
                         </div>
+                        <button
+                          onClick={() => handleToggleActive(profile)}
+                          className={`p-2 rounded-lg transition-all border ${
+                            profile.active 
+                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20' 
+                              : 'bg-slate-700/50 text-slate-500 border-slate-700 hover:text-emerald-400 hover:bg-emerald-500/10'
+                          }`}
+                          title={profile.active ? "Desactivar paciente" : "Activar paciente"}
+                        >
+                          {profile.active ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                        </button>
                       </div>
 
                       {/* Stats Row */}

@@ -99,7 +99,10 @@ export const sendAppointmentReminders = async (req, res) => {
 
   try {
     const pendingAppointments = await prisma.appointment.findMany({
-      where: { status: 'pendiente' },
+      where: { 
+        status: 'pendiente',
+        profile: { active: true }
+      },
       include: { profile: true },
       orderBy: { date: 'asc' }
     });

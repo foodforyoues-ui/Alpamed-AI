@@ -41,6 +41,7 @@ interface ProfileData {
   dailySteps: number | null;
   generalRecommendation: string | null;
   specificRecommendations: string[];
+  active: boolean;
   messages: MessageLog[];
   snapshots: Snapshot[];
 }
@@ -61,6 +62,7 @@ export default function EditProfilePage() {
     patientName: "", phone: "", realAge: "",
     doesExercise: false, exerciseType: "", sleepHours: "", dailySteps: "",
     generalRecommendation: "",
+    active: true,
   });
   const [specificRecommendations, setSpecificRecommendations] = useState<string[]>([""]);
   const [messages, setMessages] = useState<MessageLog[]>([]);
@@ -84,6 +86,7 @@ export default function EditProfilePage() {
           sleepHours: data.sleepHours?.toString() || "",
           dailySteps: data.dailySteps?.toString() || "",
           generalRecommendation: data.generalRecommendation || "",
+          active: data.active ?? true,
         });
         setSpecificRecommendations(data.specificRecommendations?.length ? data.specificRecommendations : [""]);
         setMessages(data.messages || []);
@@ -223,6 +226,9 @@ export default function EditProfilePage() {
                 <Field label="Nombre *" name="patientName" value={form.patientName} onChange={handleChange} placeholder="Ej: María García" />
                 <Field label="Teléfono WhatsApp *" name="phone" value={form.phone} onChange={handleChange} placeholder="Ej: 50371234567" hint="Con código de país, sin +" />
                 <Field label="Edad Real" name="realAge" value={form.realAge} onChange={handleChange} type="number" placeholder="Ej: 32" />
+                <div className="flex items-center h-full pt-6">
+                  <Toggle label="PACIENTE ACTIVO" name="active" checked={form.active} onChange={handleChange} />
+                </div>
               </div>
             </Section>
             <Section title="Hábitos" icon="🏃">

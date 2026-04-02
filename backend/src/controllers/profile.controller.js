@@ -65,6 +65,7 @@ export async function createProfile(req, res) {
                 specificRecommendations: Array.isArray(specificRecommendations)
                     ? specificRecommendations.filter(r => r?.trim())
                     : [],
+                active: req.body.active ?? true,
             }
         });
 
@@ -85,7 +86,7 @@ export async function updateProfile(req, res) {
         const {
             patientName, phone, realAge,
             doesExercise, exerciseType, sleepHours, dailySteps,
-            generalRecommendation, specificRecommendations
+            generalRecommendation, specificRecommendations, active
         } = req.body;
 
         const data = {};
@@ -102,6 +103,7 @@ export async function updateProfile(req, res) {
                 ? specificRecommendations.filter(r => r?.trim())
                 : [];
         }
+        if (active !== undefined) data.active = active;
 
         const profile = await prisma.profile.update({ where: { id: parseInt(id) }, data });
         res.json(profile);
@@ -118,6 +120,7 @@ export async function deleteProfile(req, res) {
         const { id } = req.params;
         const numId = parseInt(id);
         await prisma.messageLog.deleteMany({ where: { profileId: numId } });
+        await prisma.appointment.deleteMany({ where: { profileId: numId } });
         await prisma.profileSnapshot.deleteMany({ where: { profileId: numId } });
         await prisma.profile.delete({ where: { id: numId } });
         res.json({ message: 'Perfil eliminado correctamente' });
