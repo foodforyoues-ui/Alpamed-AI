@@ -333,33 +333,29 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
             margin: 0;
             size: A4 portrait;
           }
-          /* Ocultar ABSOLUTAMENTE TODO */
-          html, body, #__next, .AnimatePresence, [role="dialog"], .fixed, .no-print, aside, main, header, footer {
-            display: none !important;
-            height: 0 !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            overflow: hidden !important;
+          /* Ocultar todo por defecto usando visibilidad */
+          body {
+            visibility: hidden;
+            background: white !important;
           }
-          /* Mostrar SOLO el contenedor de reporte en la raíz del body para evitar conflictos */
+          /* Mostrar SOLO el contenido del reporte */
+          .print-content, .print-content * {
+            visibility: visible !important;
+          }
           .print-content {
             display: block !important;
-            position: fixed !important;
-            top: 0 !important;
+            position: absolute !important;
             left: 0 !important;
-            width: 210mm !important; /* A4 Width */
-            min-height: 297mm !important; /* A4 Height */
+            top: 0 !important;
+            width: 100% !important;
             margin: 0 !important;
-            padding: 2cm !important;
+            padding: 1.5cm !important;
             background: white !important;
-            color: black !important;
-            z-index: 99999 !important;
-            visibility: visible !important;
           }
-          .print-content * {
-            visibility: visible !important;
-            color: black !important;
-            border-color: #cbd5e1 !important;
+          /* Asegurar que nada más interfiera */
+          .no-print, [role="dialog"] > div:not(.print-content), .fixed, aside, main, header, footer {
+            border: none !important;
+            box-shadow: none !important;
           }
         }
       `}</style>
