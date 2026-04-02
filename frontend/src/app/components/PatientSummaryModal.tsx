@@ -88,24 +88,35 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
           className="relative w-full max-w-5xl bg-slate-900/90 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl overflow-y-auto max-h-[90vh] print:max-h-none print:shadow-none print:border-none print:w-full print:bg-white print:m-0 print:absolute print:inset-0"
         >
           {/* Header */}
-          <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-gradient-to-r from-emerald-500/10 to-teal-500/10 print:hidden">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                <User className="w-6 h-6 text-white" />
+          <div className="p-4 sm:p-6 border-b border-slate-800 flex items-center justify-between bg-gradient-to-r from-emerald-500/10 to-teal-500/10 no-print">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30 shrink-0">
+                <User className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <div>
-                <h2 className="text-2xl font-bold text-white">{profile.patientName}</h2>
-                <p className="text-slate-400 text-sm flex items-center gap-1">
-                  <Activity className="w-3 h-3 text-emerald-400" /> Expediente Nutricional Activo
-                </p>
+              <div className="min-w-0">
+                <h2 className="text-lg sm:text-2xl font-bold text-white truncate">{profile.patientName}</h2>
+                <div className="flex items-center gap-2">
+                  <p className="text-slate-400 text-xs sm:text-sm flex items-center gap-1">
+                    <Activity className="w-3 h-3 text-emerald-400 shrink-0" /> <span className="truncate">Expediente Activo</span>
+                  </p>
+                  {!profile.active && (
+                    <span className="text-[9px] bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded uppercase font-bold tracking-wider">Inactivo</span>
+                  )}
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               <button 
                 onClick={handlePrint}
-                className="flex items-center gap-2 bg-slate-800 text-white font-semibold px-4 py-2.5 rounded-xl hover:bg-slate-700 transition-all border border-slate-700"
+                className="hidden sm:flex items-center gap-2 bg-slate-800 text-white font-semibold px-4 py-2.5 rounded-xl hover:bg-slate-700 transition-all border border-slate-700 shadow-lg shadow-black/20"
               >
-                <Printer className="w-5 h-5" /> Imprimir Reporte
+                <Printer className="w-4 h-4" /> <span className="hidden lg:inline">Imprimir Reporte</span><span className="lg:hidden">Imprimir</span>
+              </button>
+              <button 
+                onClick={handlePrint}
+                className="sm:hidden p-2.5 bg-slate-800 text-white rounded-xl border border-slate-700"
+              >
+                <Printer className="w-4 h-4" />
               </button>
               <button 
                 onClick={onClose}
@@ -120,16 +131,16 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
           <div className="hidden print:block print-content p-8 text-slate-900 bg-white">
             <div className="flex justify-between items-start border-b-2 border-slate-900 pb-4 mb-6 mt-2">
               <div>
-                <h1 className="text-2xl font-black uppercase tracking-tight">Reporte de Paciente</h1>
+                <h1 className="text-2xl font-black uppercase tracking-tight text-slate-900">Reporte de Paciente</h1>
                 <p className="text-sm font-bold text-slate-600 mt-1">Plataforma Nutria — Seguimiento Profesional</p>
               </div>
-              <div className="text-right text-sm">
+              <div className="text-right text-sm text-slate-900">
                 <p className="font-bold">Fecha:</p>
                 <p>{new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-8 mb-6">
+            <div className="grid grid-cols-2 gap-8 mb-6 text-slate-900">
               <div className="space-y-2">
                 <h3 className="font-bold border-b border-slate-200 pb-1 uppercase text-[10px] tracking-wider text-slate-500">Datos Personales</h3>
                 <div className="grid grid-cols-2 gap-x-2 text-xs">
@@ -143,31 +154,31 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
                 <div className="grid grid-cols-2 gap-x-2 text-xs">
                   <p className="font-bold">Ejercicio:</p> <p>{profile.doesExercise ? profile.exerciseType : 'No realiza'}</p>
                   <p className="font-bold">Pasos Diarios:</p> <p>{profile.dailySteps?.toLocaleString() || '--'}</p>
-                  <p className="font-bold">Sueño:</p> <p>{profile.sleepHours} h</p>
+                  <p className="font-bold">Sueño:</p> <p>{profile.sleepHours} h/promedio</p>
                 </div>
               </div>
             </div>
 
-            <div className="mb-6">
+            <div className="mb-6 text-slate-900">
               <h3 className="font-bold border-b border-slate-200 pb-1 mb-3 uppercase text-[10px] tracking-wider text-slate-500">Historial Reciente (Últimos 6 seguimientos)</h3>
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-50 uppercase text-[9px] tracking-widest font-black">
-                    <th className="p-2 border">Fecha</th>
-                    <th className="p-2 border">Peso (kg)</th>
-                    <th className="p-2 border">Grasa (%)</th>
-                    <th className="p-2 border">Músculo (%)</th>
-                    <th className="p-2 border">Edad Met.</th>
+                    <th className="p-2 border border-slate-300">Fecha</th>
+                    <th className="p-2 border border-slate-300">Peso (kg)</th>
+                    <th className="p-2 border border-slate-300">Grasa (%)</th>
+                    <th className="p-2 border border-slate-300">Músculo (%)</th>
+                    <th className="p-2 border border-slate-300">Edad Met.</th>
                   </tr>
                 </thead>
                 <tbody>
                   {profile.snapshots.slice(0, 6).map(s => (
                     <tr key={s.id} className="border-b">
-                      <td className="p-2 border">{new Date(s.recordedAt).toLocaleDateString()}</td>
-                      <td className="p-2 border font-bold">{s.weight}</td>
-                      <td className="p-2 border">{s.bodyFatPercentage || '--'}</td>
-                      <td className="p-2 border">{s.muscleMassPercentage || '--'}</td>
-                      <td className="p-2 border">{s.metabolicAge || '--'}</td>
+                      <td className="p-2 border border-slate-300">{new Date(s.recordedAt).toLocaleDateString()}</td>
+                      <td className="p-2 border border-slate-300 font-bold">{s.weight}</td>
+                      <td className="p-2 border border-slate-300">{s.bodyFatPercentage || '--'}</td>
+                      <td className="p-2 border border-slate-300">{s.muscleMassPercentage || '--'}</td>
+                      <td className="p-2 border border-slate-300">{s.metabolicAge || '--'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -175,7 +186,7 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
             </div>
 
             {profile.generalRecommendation && (
-              <div className="bg-slate-50 border border-slate-100 p-4 rounded-lg mb-6">
+              <div className="bg-slate-50 border border-slate-300 p-4 rounded-lg mb-6 text-slate-900">
                 <h3 className="font-bold uppercase text-[9px] tracking-widest text-slate-500 mb-2">Recomendación General</h3>
                 <p className="text-[11px] leading-relaxed italic text-slate-700">{profile.generalRecommendation}</p>
               </div>
@@ -186,61 +197,60 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
             </div>
           </div>
 
-          <div className="p-6 space-y-8 print:hidden">
+          <div className="p-4 sm:p-6 space-y-6 sm:space-y-8 no-print">
             {/* Main Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <MetricCard 
                 label="Peso Actual" 
                 value={latestSnapshot?.weight ? `${latestSnapshot.weight} kg` : '--'} 
-                icon={<Scale className="w-5 h-5" />}
+                icon={<Scale className="w-4 h-4 sm:w-5 sm:h-5" />}
                 trend={totalWeightLost > 0 ? `-${totalWeightLost.toFixed(1)} kg total` : undefined}
                 trendColor="text-emerald-400"
               />
               <MetricCard 
                 label="IMC" 
                 value={latestSnapshot?.bmi?.toFixed(1) || '--'} 
-                icon={<Zap className="w-5 h-5" />}
+                icon={<Zap className="w-4 h-4 sm:w-5 sm:h-5" />}
               />
               <MetricCard 
                 label="Grasa Corporal" 
                 value={latestSnapshot?.bodyFatPercentage ? `${latestSnapshot.bodyFatPercentage}%` : '--'} 
-                icon={<Target className="w-5 h-5" />}
-                trend={latestSnapshot?.bodyFatPercentage ? "Optimizable" : undefined}
+                icon={<Target className="w-4 h-4 sm:w-5 sm:h-5" />}
               />
               <MetricCard 
                 label="Masa Muscular" 
                 value={latestSnapshot?.muscleMassPercentage ? `${latestSnapshot.muscleMassPercentage}%` : '--'} 
-                icon={<Activity className="w-5 h-5" />}
+                icon={<Activity className="w-4 h-4 sm:w-5 sm:h-5" />}
                 trendColor="text-teal-400"
               />
             </div>
 
             {/* Chart Section */}
-            <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-6">
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
-                <div>
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-emerald-400" />
-                    Progreso y Tendencias
+            <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-4 sm:p-6">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 sm:mb-8">
+                <div className="min-w-0">
+                  <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-emerald-400 shrink-0" />
+                    <span className="truncate">Progreso y Tendencias</span>
                   </h3>
-                  <p className="text-slate-500 text-sm">Visualización del historial de mediciones</p>
+                  <p className="text-slate-500 text-xs sm:text-sm truncate">Historial de mediciones</p>
                 </div>
-                <div className="flex gap-1 bg-slate-900 p-1 rounded-xl border border-slate-700/50">
+                <div className="flex w-full md:w-auto gap-1 bg-slate-900 p-1 rounded-xl border border-slate-700/50 overflow-x-auto whitespace-nowrap shrink-0 no-scrollbar">
                   {([5, 10, 'all'] as const).map((l) => (
                     <button
                       key={l}
                       onClick={() => setHistoryLimit(l)}
-                      className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${
-                        historyLimit === l ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20" : "text-slate-400 hover:text-white"
+                      className={`flex-1 md:flex-none px-3 sm:px-4 py-2 rounded-lg text-xs font-medium transition-all ${
+                        historyLimit === l ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20" : "text-slate-400 hover:text-white hover:bg-slate-800"
                       }`}
                     >
-                      {l === 'all' ? 'Todo' : `Últimos ${l}`}
+                      {l === 'all' ? 'Todo' : `${l} regs`}
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="h-[350px] w-full">
+              <div className="h-[250px] sm:h-[350px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={chartData}>
                     <defs>
@@ -250,13 +260,13 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                    <XAxis dataKey="fecha" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                    <XAxis dataKey="fecha" stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
                     <Tooltip 
                       contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#fff' }}
-                      itemStyle={{ fontSize: '13px' }}
+                      itemStyle={{ fontSize: '11px' }}
                     />
-                    <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
+                    <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '11px' }} />
                     <Area 
                       type="monotone" 
                       dataKey="peso" 
@@ -272,7 +282,7 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
                       name="Grasa (%)" 
                       stroke="#f43f5e" 
                       strokeWidth={2}
-                      dot={{ r: 6, fill: '#f43f5e', strokeWidth: 2, stroke: '#0f172a' }}
+                      dot={{ r: 4, fill: '#f43f5e', strokeWidth: 2, stroke: '#0f172a' }}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -280,12 +290,12 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
             </div>
 
             {/* Bottom Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
-              <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 pb-6">
+              <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-4 sm:p-6">
                 <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
                   <Info className="w-5 h-5 text-slate-400" /> Detalles Complementarios
                 </h4>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-2 gap-4 text-xs sm:text-sm">
                   <div className="space-y-1">
                     <p className="text-slate-500">Edad Metabólica</p>
                     <p className="text-white font-medium">{latestSnapshot?.metabolicAge ? `${latestSnapshot.metabolicAge} años` : '--'}</p>
@@ -300,16 +310,16 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
                   </div>
                   <div className="space-y-1">
                     <p className="text-slate-500">Ejercicio</p>
-                    <p className="text-white font-medium">{profile.doesExercise ? profile.exerciseType : 'No realiza'}</p>
+                    <p className="text-white font-medium truncate">{profile.doesExercise ? (profile.exerciseType || "Sí") : 'No realiza'}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-6 relative overflow-hidden">
-                <Target className="absolute -bottom-4 -right-4 w-24 h-24 text-emerald-500/5 rotate-12" />
-                <h4 className="text-emerald-400 font-bold mb-3">Recomendación General</h4>
-                <p className="text-slate-300 text-sm leading-relaxed relative z-10">
-                  {profile.generalRecommendation || "Sin recomendación general definida aún por el nutricionista."}
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 sm:p-6 relative overflow-hidden">
+                <Target className="absolute -bottom-4 -right-4 w-20 h-20 text-emerald-500/5 rotate-12" />
+                <h4 className="text-emerald-400 font-bold mb-3 uppercase text-[10px] tracking-widest">Recomendación General</h4>
+                <p className="text-slate-300 text-xs sm:text-sm leading-relaxed relative z-10 italic">
+                  {profile.generalRecommendation || "Sin recomendación general definida aún."}
                 </p>
               </div>
             </div>
@@ -321,27 +331,35 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
         @media print {
           @page {
             margin: 0;
-            size: auto;
+            size: A4 portrait;
           }
-          body {
-            margin: 0;
-            padding: 0;
-            background: white !important;
+          /* Ocultar ABSOLUTAMENTE TODO */
+          html, body, #__next, .AnimatePresence, [role="dialog"], .fixed, .no-print, aside, main, header, footer {
+            display: none !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
           }
-          body * {
-            visibility: hidden;
-          }
-          .print-content, .print-content * {
-            visibility: visible;
-          }
+          /* Mostrar SOLO el contenedor de reporte en la raíz del body para evitar conflictos */
           .print-content {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            margin: 0;
+            display: block !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 210mm !important; /* A4 Width */
+            min-height: 297mm !important; /* A4 Height */
+            margin: 0 !important;
             padding: 2cm !important;
+            background: white !important;
+            color: black !important;
+            z-index: 99999 !important;
+            visibility: visible !important;
+          }
+          .print-content * {
+            visibility: visible !important;
+            color: black !important;
+            border-color: #cbd5e1 !important;
           }
         }
       `}</style>
@@ -349,24 +367,19 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
   );
 }
 
-function MetricCard({ label, value, icon, trend, trendColor = 'text-slate-400', badge }: any) {
+function MetricCard({ label, value, icon, trend, trendColor = 'text-slate-400' }: any) {
   return (
-    <div className="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/50 hover:bg-slate-800 transition-all hover:scale-[1.02]">
+    <div className="bg-slate-800/60 p-3 sm:p-4 rounded-2xl border border-slate-700/50 hover:bg-slate-800 transition-all">
       <div className="flex items-start justify-between mb-2">
-        <div className="p-2 bg-slate-900 rounded-lg text-emerald-400">
+        <div className="p-1.5 sm:p-2 bg-slate-900 rounded-lg text-emerald-400">
           {icon}
         </div>
-        {badge && (
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold uppercase tracking-wider">
-            {badge}
-          </span>
-        )}
       </div>
-      <p className="text-slate-400 text-xs font-medium mb-1">{label}</p>
-      <div className="flex items-baseline gap-2">
-        <span className="text-2xl font-bold text-white">{value}</span>
+      <p className="text-slate-400 text-[10px] sm:text-xs font-medium mb-1 truncate">{label}</p>
+      <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
+        <span className="text-lg sm:text-2xl font-bold text-white whitespace-nowrap">{value}</span>
         {trend && (
-          <span className={`text-[10px] ${trendColor} font-bold flex items-center gap-0.5`}>
+          <span className={`text-[9px] sm:text-[10px] ${trendColor} font-bold flex items-center gap-0.5 whitespace-nowrap`}>
             {trend.startsWith('-') ? <TrendingDown size={10} /> : <TrendingUp size={10} />}
             {trend}
           </span>

@@ -256,30 +256,30 @@ export default function Home() {
               className="p-4 md:p-8"
             >
               {/* Header */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
                 <div>
-                  <h2 className="text-2xl font-bold text-white">Perfiles de Pacientes</h2>
-                  <p className="text-slate-400 mt-1">Gestiona expedientes y envía mensajes personalizados con IA</p>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">Perfiles de Pacientes</h2>
+                  <p className="text-slate-400 text-xs sm:text-sm mt-1 sm:mt-0">Gestiona expedientes y mensajes con IA</p>
                 </div>
                 <Link
                   href="/profiles/new"
-                  className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold px-5 py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/30 hover:shadow-emerald-400/40 hover:scale-105"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/30 active:scale-95"
                 >
                   <Plus className="w-5 h-5" />
-                  Nuevo Perfil
+                  <span>Nuevo Perfil</span>
                 </Link>
               </div>
 
               {/* Filters & Search */}
               {!loading && profiles.length > 0 && (
-                <div className="flex flex-col md:flex-row gap-4 mb-8 items-start md:items-center justify-between">
+                <div className="flex flex-col lg:flex-row gap-4 mb-6 sm:mb-8 items-stretch lg:items-center justify-between">
                   {/* Status Tabs */}
-                  <div className="flex gap-1 bg-slate-800/40 p-1 rounded-xl border border-slate-700/50 w-fit">
+                  <div className="flex gap-1 bg-slate-800/40 p-1 rounded-xl border border-slate-700/50 w-full lg:w-fit overflow-x-auto no-scrollbar">
                     {(["active", "inactive", "all"] as const).map(f => (
                       <button
                         key={f}
-                        onClick={() => setFilter(f)}
-                        className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${
+                        onClick={() => { setFilter(f); }}
+                        className={`flex-1 lg:flex-none px-3 sm:px-4 py-2 rounded-lg text-[10px] sm:text-xs font-medium transition-all whitespace-nowrap ${
                           filter === f ? "bg-slate-700 text-white shadow-sm" : "text-slate-500 hover:text-slate-300"
                         }`}
                       >
@@ -289,14 +289,14 @@ export default function Home() {
                   </div>
 
                   {/* Search Bar */}
-                  <div className="relative w-full md:w-72">
+                  <div className="relative w-full lg:w-72">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                     <input
                       type="text"
-                      placeholder="Buscar paciente por nombre..."
+                      placeholder="Buscar paciente..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full bg-slate-800/60 border border-slate-700/50 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all"
+                      className="w-full bg-slate-800/60 border border-slate-700/50 rounded-xl py-2 sm:py-2.5 pl-10 pr-4 text-xs sm:text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all"
                     />
                   </div>
                 </div>
@@ -376,60 +376,60 @@ export default function Home() {
                       </div>
 
                       {/* Stats Row */}
-                      <div className="grid grid-cols-3 gap-2 mb-4">
+                      <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mb-4">
                         {profile.realAge && (
-                          <div className="bg-slate-700/50 rounded-lg p-2 text-center">
-                            <p className="text-emerald-400 font-bold text-lg">{profile.realAge}</p>
-                            <p className="text-slate-500 text-xs">Edad</p>
+                          <div className="bg-slate-700/50 rounded-lg p-1.5 sm:p-2 text-center">
+                            <p className="text-emerald-400 font-bold text-base sm:text-lg">{profile.realAge}</p>
+                            <p className="text-slate-500 text-[10px]">Edad</p>
                           </div>
                         )}
                         {profile.currentWeight && (
-                          <div className="bg-slate-700/50 rounded-lg p-2 text-center">
-                            <p className="text-emerald-400 font-bold text-lg">{profile.currentWeight}</p>
-                            <p className="text-slate-500 text-xs">Peso kg</p>
+                          <div className="bg-slate-700/50 rounded-lg p-1.5 sm:p-2 text-center">
+                            <p className="text-emerald-400 font-bold text-base sm:text-lg">{profile.currentWeight}</p>
+                            <p className="text-slate-500 text-[10px]">Peso kg</p>
                           </div>
                         )}
                         {profile.bmi && (
-                          <div className="bg-slate-700/50 rounded-lg p-2 text-center">
-                            <p className="text-emerald-400 font-bold text-lg">{profile.bmi}</p>
-                            <p className="text-slate-500 text-xs">IMC</p>
+                          <div className="bg-slate-700/50 rounded-lg p-1.5 sm:p-2 text-center">
+                            <p className="text-emerald-400 font-bold text-base sm:text-lg">{profile.bmi}</p>
+                            <p className="text-slate-500 text-[10px]">IMC</p>
                           </div>
                         )}
                       </div>
 
                       {/* Tags */}
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        <span className={`text-xs px-2 py-1 rounded-full ${profile.doesExercise ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-700 text-slate-400'}`}>
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
+                        <span className={`text-[10px] sm:text-xs px-2 py-1 rounded-full whitespace-nowrap ${profile.doesExercise ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-700 text-slate-400'}`}>
                           {profile.doesExercise ? `💪 ${profile.exerciseType || "Hace ejercicio"}` : "Sin ejercicio"}
                         </span>
                         {profile._count && (
-                          <span className="text-xs px-2 py-1 rounded-full bg-slate-700 text-slate-400 flex items-center gap-1">
+                          <span className="text-[10px] sm:text-xs px-2 py-1 rounded-full bg-slate-700 text-slate-400 flex items-center gap-1 whitespace-nowrap">
                             <MessageSquare className="w-3 h-3" />
-                            {profile._count.messages} mensajes
+                            {profile._count.messages}
                           </span>
                         )}
                       </div>
 
                       {/* Actions */}
-                      <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t border-slate-700/50">
+                      <div className="flex flex-row sm:flex-row gap-2 pt-3 border-t border-slate-700/50">
                         <Link
                           href={`/profiles/${profile.id}`}
-                          className="flex-1 flex items-center justify-center gap-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-sm font-medium py-2 rounded-lg transition-all border border-emerald-500/20 hover:border-emerald-500/40"
+                          className="flex-1 flex items-center justify-center gap-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs sm:text-sm font-medium py-2 rounded-lg transition-all border border-emerald-500/20"
                         >
-                          <Edit3 className="w-4 h-4" />
-                          Editar
+                          <Edit3 className="w-3.5 h-3.5" />
+                          <span className="hidden xs:inline">Editar</span>
                         </Link>
                         <Link
                           href={`/profiles/${profile.id}/send`}
-                          className="flex-1 flex items-center justify-center gap-2 bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white text-sm font-medium py-2 rounded-lg transition-all"
+                          className="flex-1 flex items-center justify-center gap-1.5 bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white text-xs sm:text-sm font-medium py-2 rounded-lg transition-all"
                         >
-                          <MessageSquare className="w-4 h-4" />
-                          Mensaje
+                          <MessageSquare className="w-3.5 h-3.5" />
+                          <span className="hidden xs:inline">Mensaje</span>
                         </Link>
                         <button
                           onClick={(e) => { e.stopPropagation(); handleDelete(profile.id, profile.patientName); }}
                           disabled={deleting === profile.id}
-                          className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-all border border-red-500/20 hover:border-red-500/40 disabled:opacity-50"
+                          className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-all border border-red-500/20 disabled:opacity-50"
                         >
                           {deleting === profile.id
                             ? <div className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
