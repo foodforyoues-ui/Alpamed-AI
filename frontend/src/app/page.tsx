@@ -6,20 +6,37 @@ import Link from "next/link";
 import Cookies from "js-cookie";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Smartphone, Plus, Trash2, Edit3, MessageSquare, Activity, ChevronRight, Calendar, Clock, MapPin, MoreVertical, X, CheckCircle, XCircle, ChevronLeft, CalendarDays, Bell, Send, LogOut, Menu, UserPlus, Shield, Eye, EyeOff, Search } from "lucide-react";
+import PatientSummaryModal from "./components/PatientSummaryModal";
 
 interface Profile {
   id: number;
   patientName: string;
   phone: string;
+  realAge: number | null;
   doesExercise: boolean;
   exerciseType: string | null;
   currentWeight: number | null;
   bmi: number | null;
   metabolicAge: number | null;
-  realAge: number | null;
   createdAt: string;
   active: boolean;
+  snapshots: Snapshot[];
+  sleepHours: number | null;
+  dailySteps: number | null;
+  generalRecommendation: string | null;
+  specificRecommendations: string[];
   _count?: { messages: number };
+}
+
+interface Snapshot {
+  id: number;
+  weight: number | null;
+  bmi: number | null;
+  bodyFatPercentage: number | null;
+  muscleMassPercentage: number | null;
+  metabolicAge: number | null;
+  lostWeight: number | null;
+  recordedAt: string;
 }
 
 export default function Home() {
@@ -31,6 +48,8 @@ export default function Home() {
   const [highlightedAppointmentId, setHighlightedAppointmentId] = useState<number | null>(null);
   const [filter, setFilter] = useState<"all" | "active" | "inactive">("active");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
 
   const handleToggleActive = async (profile: Profile) => {
     try {
@@ -63,6 +82,21 @@ export default function Home() {
       console.error("Error al obtener perfiles:", e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCardClick = async (id: number) => {
+    setLoadingDetails(true);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/profiles/${id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setSelectedProfile(data);
+      }
+    } catch (e) {
+      console.error("Error al obtener detalles:", e);
+    } finally {
+      setLoadingDetails(false);
     }
   };
 
@@ -302,8 +336,14 @@ export default function Home() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3, delay: i * 0.05 }}
                       whileHover={{ scale: 1.02 }}
-                      className="bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-2xl p-5 hover:border-emerald-500/30 hover:bg-slate-800/80 transition-all group"
+                      onClick={() => handleCardClick(profile.id)}
+                      className="bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-2xl p-5 hover:border-emerald-500/30 hover:bg-slate-800/80 transition-all group cursor-pointer relative"
                     >
+                      {loadingDetails && selectedProfile?.id === profile.id && (
+                        <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-10 flex items-center justify-center rounded-2xl">
+                          <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                        </div>
+                      )}
                       {/* Card Header */}
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -323,8 +363,8 @@ export default function Home() {
                           </div>
                         </div>
                         <button
-                          onClick={() => handleToggleActive(profile)}
-                          className={`p-2 rounded-lg transition-all border ${
+                          onClick={(e) => { e.stopPropagation(); handleToggleActive(profile); }}
+                          className={`p-2 rounded-lg transition-all border z-20 ${
                             profile.active 
                               ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20' 
                               : 'bg-slate-700/50 text-slate-500 border-slate-700 hover:text-emerald-400 hover:bg-emerald-500/10'
@@ -387,7 +427,7 @@ export default function Home() {
                           Mensaje
                         </Link>
                         <button
-                          onClick={() => handleDelete(profile.id, profile.patientName)}
+                          onClick={(e) => { e.stopPropagation(); handleDelete(profile.id, profile.patientName); }}
                           disabled={deleting === profile.id}
                           className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-all border border-red-500/20 hover:border-red-500/40 disabled:opacity-50"
                         >
@@ -441,6 +481,14 @@ export default function Home() {
           )}
           </AnimatePresence>
         </main>
+
+        {/* Modal de Resumen */}
+        {selectedProfile && (
+          <PatientSummaryModal 
+            profile={selectedProfile} 
+            onClose={() => setSelectedProfile(null)} 
+          />
+        )}
     </div>
   );
 }
