@@ -117,57 +117,57 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
           </div>
 
           {/* Printable Content (Visible only during print) */}
-          <div className="hidden print:block print-content p-10 text-slate-900 bg-white min-h-screen">
-            <div className="flex justify-between items-start border-b-2 border-slate-900 pb-6 mb-8 mt-4">
+          <div className="hidden print:block print-content p-8 text-slate-900 bg-white">
+            <div className="flex justify-between items-start border-b-2 border-slate-900 pb-4 mb-6 mt-2">
               <div>
-                <h1 className="text-3xl font-black uppercase tracking-tight">Reporte de Paciente</h1>
-                <p className="text-lg font-bold text-slate-600 mt-1">Plataforma Nutria — Seguimiento Profesional</p>
+                <h1 className="text-2xl font-black uppercase tracking-tight">Reporte de Paciente</h1>
+                <p className="text-sm font-bold text-slate-600 mt-1">Plataforma Nutria — Seguimiento Profesional</p>
               </div>
-              <div className="text-right">
-                <p className="font-bold">Fecha de Reporte:</p>
+              <div className="text-right text-sm">
+                <p className="font-bold">Fecha:</p>
                 <p>{new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-10 mb-10">
-              <div className="space-y-4">
-                <h3 className="font-bold border-b border-slate-200 pb-1 uppercase text-sm">Datos del Expediente</h3>
-                <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="grid grid-cols-2 gap-8 mb-6">
+              <div className="space-y-2">
+                <h3 className="font-bold border-b border-slate-200 pb-1 uppercase text-[10px] tracking-wider text-slate-500">Datos Personales</h3>
+                <div className="grid grid-cols-2 gap-x-2 text-xs">
                   <p className="font-bold">Nombre:</p> <p>{profile.patientName}</p>
                   <p className="font-bold">Teléfono:</p> <p>{profile.phone}</p>
                   <p className="font-bold">Edad:</p> <p>{profile.realAge} años</p>
                 </div>
               </div>
-              <div className="space-y-4">
-                <h3 className="font-bold border-b border-slate-200 pb-1 uppercase text-sm">Hábitos Declarados</h3>
-                <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="space-y-2">
+                <h3 className="font-bold border-b border-slate-200 pb-1 uppercase text-[10px] tracking-wider text-slate-500">Hábitos</h3>
+                <div className="grid grid-cols-2 gap-x-2 text-xs">
                   <p className="font-bold">Ejercicio:</p> <p>{profile.doesExercise ? profile.exerciseType : 'No realiza'}</p>
                   <p className="font-bold">Pasos Diarios:</p> <p>{profile.dailySteps?.toLocaleString() || '--'}</p>
-                  <p className="font-bold">Sueño:</p> <p>{profile.sleepHours} h/promedio</p>
+                  <p className="font-bold">Sueño:</p> <p>{profile.sleepHours} h</p>
                 </div>
               </div>
             </div>
 
-            <div className="mb-10">
-              <h3 className="font-bold border-b border-slate-200 pb-1 mb-4 uppercase text-sm">Últimas Mediciones</h3>
-              <table className="w-full text-left text-sm border-collapse">
+            <div className="mb-6">
+              <h3 className="font-bold border-b border-slate-200 pb-1 mb-3 uppercase text-[10px] tracking-wider text-slate-500">Historial Reciente (Últimos 6 seguimientos)</h3>
+              <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="bg-slate-100 uppercase text-[10px] tracking-widest font-black">
-                    <th className="p-3 border">Fecha</th>
-                    <th className="p-3 border">Peso (kg)</th>
-                    <th className="p-3 border">Grasa (%)</th>
-                    <th className="p-3 border">Músculo (%)</th>
-                    <th className="p-3 border">Edad Metab.</th>
+                  <tr className="bg-slate-50 uppercase text-[9px] tracking-widest font-black">
+                    <th className="p-2 border">Fecha</th>
+                    <th className="p-2 border">Peso (kg)</th>
+                    <th className="p-2 border">Grasa (%)</th>
+                    <th className="p-2 border">Músculo (%)</th>
+                    <th className="p-2 border">Edad Met.</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {profile.snapshots.slice(0, 10).map(s => (
+                  {profile.snapshots.slice(0, 6).map(s => (
                     <tr key={s.id} className="border-b">
-                      <td className="p-3 border">{new Date(s.recordedAt).toLocaleDateString()}</td>
-                      <td className="p-3 border font-bold">{s.weight}</td>
-                      <td className="p-3 border">{s.bodyFatPercentage || '--'}</td>
-                      <td className="p-3 border">{s.muscleMassPercentage || '--'}</td>
-                      <td className="p-3 border">{s.metabolicAge || '--'}</td>
+                      <td className="p-2 border">{new Date(s.recordedAt).toLocaleDateString()}</td>
+                      <td className="p-2 border font-bold">{s.weight}</td>
+                      <td className="p-2 border">{s.bodyFatPercentage || '--'}</td>
+                      <td className="p-2 border">{s.muscleMassPercentage || '--'}</td>
+                      <td className="p-2 border">{s.metabolicAge || '--'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -175,14 +175,14 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
             </div>
 
             {profile.generalRecommendation && (
-              <div className="bg-slate-50 border border-slate-200 p-6 rounded-xl mb-10">
-                <h3 className="font-bold uppercase text-xs mb-3">Recomendación General del Nutricionista</h3>
-                <p className="text-sm italic leading-relaxed">{profile.generalRecommendation}</p>
+              <div className="bg-slate-50 border border-slate-100 p-4 rounded-lg mb-6">
+                <h3 className="font-bold uppercase text-[9px] tracking-widest text-slate-500 mb-2">Recomendación General</h3>
+                <p className="text-[11px] leading-relaxed italic text-slate-700">{profile.generalRecommendation}</p>
               </div>
             )}
 
-            <div className="mt-auto pt-10 text-center text-[10px] text-slate-400 border-t border-slate-100">
-              Este reporte es para uso clínico exclusivo y se genera automáticamente desde la Plataforma Nutria.
+            <div className="mt-8 pt-6 text-center text-[9px] text-slate-400 border-t border-slate-100 uppercase tracking-widest">
+              Reporte clínico de uso interno — Generado por Plataforma Nutria
             </div>
           </div>
 
@@ -319,6 +319,15 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
 
       <style jsx global>{`
         @media print {
+          @page {
+            margin: 0;
+            size: auto;
+          }
+          body {
+            margin: 0;
+            padding: 0;
+            background: white !important;
+          }
           body * {
             visibility: hidden;
           }
@@ -330,6 +339,9 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
             left: 0;
             top: 0;
             width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 2cm !important;
           }
         }
       `}</style>
