@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Cookies from "js-cookie";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Smartphone, Plus, Trash2, Edit3, MessageSquare, Activity, ChevronRight, Calendar, Clock, MapPin, MoreVertical, X, CheckCircle, XCircle, ChevronLeft, CalendarDays, Bell, Send, LogOut, Menu } from "lucide-react";
+import { Users, Smartphone, Plus, Trash2, Edit3, MessageSquare, Activity, ChevronRight, Calendar, Clock, MapPin, MoreVertical, X, CheckCircle, XCircle, ChevronLeft, CalendarDays, Bell, Send, LogOut, Menu, UserPlus, Shield } from "lucide-react";
 
 interface Profile {
   id: number;
@@ -24,7 +24,7 @@ interface Profile {
 export default function Home() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<"dashboard" | "whatsapp" | "messages" | "appointments" | "calendar">("dashboard");
+  const [view, setView] = useState<"dashboard" | "whatsapp" | "messages" | "appointments" | "calendar" | "users">("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [deleting, setDeleting] = useState<number | null>(null);
   const [highlightedAppointmentId, setHighlightedAppointmentId] = useState<number | null>(null);
@@ -153,6 +153,17 @@ export default function Home() {
             >
               <CalendarDays className="w-5 h-5" />
               <span className="font-medium">Calendario</span>
+            </button>
+            <button
+              onClick={() => { setView("users"); setIsSidebarOpen(false); }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
+                view === "users"
+                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
+              }`}
+            >
+              <Shield className="w-5 h-5" />
+              <span className="font-medium">Usuarios</span>
             </button>
           </nav>
 
@@ -341,12 +352,17 @@ export default function Home() {
             </motion.div>
           )}
 
-          {view === "calendar" && (
             <motion.div key="calendar" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.3 }} className="h-full">
               <CalendarSection onGoToAppointment={(id) => {
                 setHighlightedAppointmentId(id);
                 setView("appointments");
               }} />
+            </motion.div>
+          )}
+
+          {view === "users" && (
+            <motion.div key="users" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.3 }} className="h-full">
+              <UsersSection />
             </motion.div>
           )}
           </AnimatePresence>
@@ -1338,6 +1354,215 @@ function MiniStat({ label, value, unit = "", highlight = false }: { label: strin
     <div className="bg-slate-700/40 rounded-lg p-2 text-center">
       <p className={`font-bold text-base leading-tight ${highlight ? "text-emerald-400" : "text-slate-200"}`}>{value}{value !== "—" ? unit : ""}</p>
       <p className="text-slate-500 text-xs mt-0.5">{label}</p>
+    </div>
+  );
+}
+
+// ============================================================
+// COMPONENTE DE USUARIOS (NUTRICIONISTAS)
+// ============================================================
+function UsersSection() {
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState<number | null>(null);
+
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: ""
+  });
+
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/auth/users`);
+      if (res.ok) {
+        const data = await res.json();
+        setUsers(data);
+      }
+    } catch (e) {
+      console.error("Error al obtener usuarios:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/auth/register`, {
+        method: "POST",
+        body: JSON.stringify(form)
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        setForm({ name: "", email: "", password: "" });
+        setShowModal(false);
+        fetchUsers();
+      } else {
+        alert(data.error || "Error al crear usuario");
+      }
+    } catch (e) {
+      alert("Error de conexión");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("¿Seguro que deseas eliminar a este usuario?")) return;
+    setDeleting(id);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/auth/users/${id}`, {
+        method: "DELETE"
+      });
+      const data = await res.json();
+      
+      if (res.ok) {
+        setUsers(users.filter((u) => u.id !== id));
+      } else {
+        alert(data.error || "Error al eliminar usuario");
+      }
+    } catch (e) {
+      alert("Error de red al eliminar.");
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  return (
+    <div className="p-4 sm:p-6 md:p-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h2 className="text-2xl font-bold text-white">Panel de Usuarios</h2>
+          <p className="text-slate-400 mt-1">Gestiona los accesos al sistema y registra a otros usuarios</p>
+        </div>
+        <button
+          onClick={() => setShowModal(true)}
+          className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold px-5 py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/30 hover:shadow-emerald-400/40 hover:scale-105"
+        >
+          <UserPlus className="w-5 h-5" />
+          Nuevo Usuario
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-24">
+          <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {users.map((u) => (
+            <div key={u.id} className="bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-2xl p-5 hover:border-emerald-500/30 transition-all flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-slate-700 text-emerald-400 rounded-xl flex items-center justify-center font-bold text-xl">
+                    {u.name ? u.name.charAt(0).toUpperCase() : u.email.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-white">{u.name || "Sin nombre"}</h3>
+                    <p className="text-sm text-slate-400 truncate w-40">{u.email}</p>
+                  </div>
+                </div>
+                <div className="bg-slate-900/50 rounded-lg p-3 text-sm text-slate-400">
+                  Registrado el {new Date(u.createdAt).toLocaleDateString()}
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t border-slate-700/50 flex justify-end">
+                <button
+                  onClick={() => handleDelete(u.id)}
+                  disabled={deleting === u.id}
+                  className="flex items-center gap-1.5 px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-all border border-red-500/20 hover:border-red-500/40 text-sm font-medium disabled:opacity-50"
+                  title="Eliminar usuario"
+                >
+                  {deleting === u.id ? <div className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <AnimatePresence>
+        {showModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => !saving && setShowModal(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+              className="relative bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
+            >
+              <div className="flex items-center justify-between p-5 border-b border-slate-800">
+                <h3 className="text-lg font-bold text-white">Registrar Usuario</h3>
+                <button
+                  onClick={() => setShowModal(false)}
+                  disabled={saving}
+                  className="p-1.5 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <form onSubmit={handleRegister} className="p-5 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Nombre (Opcional)</label>
+                  <input
+                    type="text"
+                    required
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-slate-500"
+                    placeholder="Ej. Dr. Juan Pérez"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Correo Electrónico</label>
+                  <input
+                    type="email"
+                    required
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-slate-500"
+                    placeholder="correo@ejemplo.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Contraseña</label>
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-slate-500"
+                    placeholder="Mínimo 6 caracteres"
+                  />
+                </div>
+                
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/20"
+                  >
+                    {saving ? "Registrando..." : "Crear Usuario"}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

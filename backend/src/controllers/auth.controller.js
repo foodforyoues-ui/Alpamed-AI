@@ -31,7 +31,7 @@ export const register = async (req, res) => {
         });
 
         const token = jwt.sign({ id: newUser.id, email: newUser.email }, JWT_SECRET, {
-            expiresIn: '7d',
+            expiresIn: '1h',
         });
 
         res.status(201).json({
@@ -68,7 +68,7 @@ export const login = async (req, res) => {
         }
 
         const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
-            expiresIn: '7d',
+            expiresIn: '1h',
         });
 
         res.status(200).json({
@@ -96,6 +96,41 @@ export const getMe = async (req, res) => {
         res.status(200).json({ user });
     } catch (error) {
         console.error('Error en getMe:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+};
+
+export const getUsers = async (req, res) => {
+    try {
+        const users = await prisma.user.findMany({
+            select: { id: true, name: true, email: true, createdAt: true }
+        });
+        res.status(200).json(users);
+    } catch (error) {
+        console.error('Error en getUsers:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+};
+
+export const deleteUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = parseInt(id);
+        
+        if (req.user.id === userId) {
+            return res.status(400).json({ error: 'No puedes eliminar tu propio usuario' });
+        }
+
+        await prisma.user.delete({
+            where: { id: userId }
+        });
+
+        res.status(200).json({ message: 'Usuario eliminado exitosamente' });
+    } catch (error) {
+        console.error('Error en deleteUser:', error);
+        if (error.code === 'P2025') {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
         res.status(500).json({ error: 'Error interno del servidor' });
     }
 };
