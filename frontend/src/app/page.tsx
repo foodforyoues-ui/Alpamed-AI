@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Cookies from "js-cookie";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Smartphone, Plus, Trash2, Edit3, MessageSquare, Activity, ChevronRight, Calendar, Clock, MapPin, MoreVertical, X, CheckCircle, XCircle, ChevronLeft, CalendarDays, Bell, Send, LogOut, Menu, UserPlus, Shield } from "lucide-react";
+import { Users, Smartphone, Plus, Trash2, Edit3, MessageSquare, Activity, ChevronRight, Calendar, Clock, MapPin, MoreVertical, X, CheckCircle, XCircle, ChevronLeft, CalendarDays, Bell, Send, LogOut, Menu, UserPlus, Shield, Eye, EyeOff } from "lucide-react";
 
 interface Profile {
   id: number;
@@ -1368,6 +1368,7 @@ function UsersSection() {
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState<number | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -1542,15 +1543,24 @@ function UsersSection() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1.5">Contraseña</label>
-                  <input
-                    type="password"
-                    required
-                    minLength={6}
-                    value={form.password}
-                    onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-slate-500"
-                    placeholder="Mínimo 6 caracteres"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      minLength={6}
+                      value={form.password}
+                      onChange={(e) => setForm({ ...form, password: e.target.value })}
+                      className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-slate-500 pr-10"
+                      placeholder="Mínimo 6 caracteres"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-emerald-500 transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
                 </div>
                 
                 <div className="pt-2">
