@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Nutria - Plataforma para Nutricionistas",
+  title: "Alpamed - AI Assistant",
   description: "Gestiona perfiles de pacientes y envía recomendaciones personalizadas vía WhatsApp con inteligencia artificial.",
 };
 
@@ -26,8 +26,21 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <head>
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+              document.documentElement.classList.add('dark');
+            } else {
+              document.documentElement.classList.remove('dark');
+            }
+          `
+        }} />
+      </head>
+      <body className="min-h-full flex flex-col transition-colors duration-300">{children}</body>
     </html>
   );
 }
+

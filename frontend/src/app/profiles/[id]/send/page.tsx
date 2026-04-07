@@ -58,21 +58,21 @@ export default function SendMessagePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-slate-900 to-slate-950 py-8 px-4">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors py-8 px-4">
       <div className="max-w-lg mx-auto">
         <div className="flex items-center gap-4 mb-8">
-          <Link href="/" className="p-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-400 hover:text-white transition-all">
+          <Link href="/" className="p-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-xl font-bold text-white">Enviar Mensaje</h1>
-            <p className="text-slate-400 text-sm">{profile?.patientName} • +{profile?.phone}</p>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-white">Enviar Mensaje</h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">{profile?.patientName} • +{profile?.phone}</p>
           </div>
         </div>
 
-        <div className="bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-2xl overflow-hidden">
-          <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-5 text-center">
-            <p className="text-emerald-100 text-sm">La IA generará un mensaje usando el expediente completo de</p>
+        <div className="bg-white dark:bg-slate-800/60 backdrop-blur border border-slate-200 dark:border-slate-700/50 rounded-2xl overflow-hidden shadow-sm">
+          <div className="bg-primary p-5 text-center">
+            <p className="text-white/80 text-sm">La IA generará un mensaje usando el expediente completo de</p>
             <p className="text-white font-bold text-xl mt-1">{profile?.patientName}</p>
           </div>
 
@@ -80,10 +80,10 @@ export default function SendMessagePage() {
             {/* WhatsApp Not Connected */}
             {waStatus === "idle" && (
               <div className="text-center space-y-4">
-                <p className="text-slate-400 text-sm">Primero conecta WhatsApp para enviar el mensaje.</p>
+                <p className="text-slate-500 dark:text-slate-400 text-sm">Primero conecta WhatsApp para enviar el mensaje.</p>
                 <button
                   onClick={() => { setWaStatus("loading"); socket?.emit("start-connection"); }}
-                  className="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/30"
+                  className="w-full flex items-center justify-center gap-2 bg-primary hover:opacity-90 text-white font-semibold py-3 rounded-xl transition-all shadow-lg"
                 >
                   <QrCode className="w-5 h-5" /> Conectar WhatsApp
                 </button>
@@ -92,15 +92,15 @@ export default function SendMessagePage() {
 
             {waStatus === "loading" && (
               <div className="flex flex-col items-center py-6 gap-3">
-                <Loader2 className="w-10 h-10 text-emerald-400 animate-spin" />
-                <p className="text-slate-300 text-sm animate-pulse">Iniciando WhatsApp...</p>
+                <Loader2 className="w-10 h-10 text-primary animate-spin" />
+                <p className="text-slate-700 dark:text-slate-300 text-sm animate-pulse">Iniciando WhatsApp...</p>
               </div>
             )}
 
             {waStatus === "qr" && (
               <div className="flex flex-col items-center gap-4">
-                <p className="text-slate-300 text-sm text-center">Escanea este código desde WhatsApp → Dispositivos vinculados</p>
-                <div className="p-4 bg-white rounded-2xl shadow-lg">
+                <p className="text-slate-700 dark:text-slate-300 text-sm text-center">Escanea este código desde WhatsApp → Dispositivos vinculados</p>
+                <div className="p-4 bg-white rounded-2xl shadow-lg border border-slate-100 dark:border-slate-800">
                   <QRCodeSVG value={qrCode} size={200} level="H" />
                 </div>
               </div>
@@ -108,16 +108,16 @@ export default function SendMessagePage() {
 
             {waStatus === "connected" && (
               <div className="space-y-6">
-                <div className="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3">
-                  <ShieldCheck className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                  <p className="text-emerald-300 text-sm">WhatsApp conectado — Listo para enviar</p>
+                <div className="flex items-center gap-3 bg-primary/10 border border-primary/30 rounded-xl p-3">
+                  <ShieldCheck className="w-5 h-5 text-primary flex-shrink-0" />
+                  <p className="text-primary text-sm font-medium">WhatsApp conectado — Listo para enviar</p>
                 </div>
 
-                <div className="bg-slate-700/40 rounded-xl p-4 text-sm text-slate-400 leading-relaxed">
-                  <p className="font-medium text-slate-300 mb-2">¿Qué pasará al enviar?</p>
+                <div className="bg-slate-50 dark:bg-slate-700/40 rounded-xl p-4 text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                  <p className="font-medium text-slate-900 dark:text-slate-300 mb-2">¿Qué pasará al enviar?</p>
                   <ul className="space-y-1 list-disc list-inside">
                     <li>Azure OpenAI leerá el expediente completo</li>
-                    <li>Generará un mensaje personalizado con 🥑</li>
+                    <li>Generará un mensaje personalizado con <img src="/ALPAMED-nobg.png" alt="Alpamed" className="w-5 h-5 inline object-contain align-text-bottom" /></li>
                     <li>Lo enviará al +{profile?.phone} de {profile?.patientName}</li>
                     <li>Guardará el mensaje en el historial del perfil</li>
                   </ul>
@@ -126,7 +126,7 @@ export default function SendMessagePage() {
                 <button
                   onClick={handleSend}
                   disabled={sendStatus.loading}
-                  className="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-600 disabled:text-slate-400 text-white font-semibold py-4 rounded-xl transition-all shadow-lg shadow-emerald-500/30 text-lg"
+                  className="w-full flex items-center justify-center gap-2 bg-primary hover:opacity-90 disabled:bg-slate-200 dark:disabled:bg-slate-600 disabled:text-slate-500 dark:disabled:text-slate-400 text-white font-semibold py-4 rounded-xl transition-all shadow-lg text-lg"
                 >
                   {sendStatus.loading
                     ? <><Loader2 className="w-5 h-5 animate-spin" /> Generando mensaje...</>
@@ -135,12 +135,12 @@ export default function SendMessagePage() {
                 </button>
 
                 {sendStatus.msg && (
-                  <div className={`flex items-center gap-3 p-3 rounded-xl border ${sendStatus.success ? "bg-emerald-500/10 border-emerald-500/30" : "bg-red-500/10 border-red-500/30"}`}>
+                  <div className={`flex items-center gap-3 p-3 rounded-xl border ${sendStatus.success ? "bg-primary/10 border-primary/30" : "bg-red-500/10 border-red-500/30"}`}>
                     {sendStatus.success
-                      ? <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                      : <XCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+                      ? <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
+                      : <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
                     }
-                    <p className={`text-sm ${sendStatus.success ? "text-emerald-300" : "text-red-300"}`}>
+                    <p className={`text-sm ${sendStatus.success ? "text-primary font-medium" : "text-red-500 font-medium"}`}>
                       {sendStatus.msg}
                     </p>
                   </div>
