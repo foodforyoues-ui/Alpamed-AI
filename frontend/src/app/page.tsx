@@ -120,13 +120,13 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen transition-colors  via-slate-900 to-slate-950 flex flex-col md:flex-row">
+    <div className="min-h-screen transition-colors    flex flex-col md:flex-row">
       
       {/* Mobile Top Bar */}
       <div className="md:hidden flex items-center justify-between p-4 bg-white dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 backdrop-blur-sm sticky top-0 z-40">
         <div className="flex items-center gap-3">
-          <div className="h-8 bg-white rounded-md flex items-center justify-center px-2 py-1 shadow-sm">
-            <img src="/ALPAMED-nobg.png" alt="Alpamed" className="h-full w-auto max-w-[80px] object-contain" />
+          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center p-1.5 shadow-md">
+            <img src="/ALPAMED-nobg.png" alt="Alpamed" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-slate-900 dark:text-white font-bold text-lg leading-tight">Alpamed</h1>
         </div>
@@ -139,11 +139,11 @@ export default function Home() {
               document.documentElement.classList.add('dark');
               localStorage.setItem('theme', 'dark');
             }
-          }} className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 rounded-xl">
+          }} className="p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 rounded-xl">
             <span className="block dark:hidden">🌙</span>
             <span className="hidden dark:block">☀️</span>
           </button>
-          <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 rounded-xl">
+          <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 rounded-xl">
             <Menu className="w-6 h-6" />
           </button>
         </div>
@@ -160,13 +160,16 @@ export default function Home() {
       {/* Sidebar */}
       <aside className={`fixed md:relative inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 md:bg-white dark:bg-slate-900/80 border-r border-slate-200 dark:border-slate-800 flex flex-col backdrop-blur-sm transition-transform duration-300 ease-in-out md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         {/* Logo */}
-          <div className="p-6 border-b border-slate-200 dark:border-slate-800">
+          <div className="p-5 border-b border-slate-200 dark:border-slate-800">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-10 bg-white rounded-lg flex items-center justify-center shadow-lg p-2">
-                  <img src="/ALPAMED-nobg.png" alt="Alpamed" className="h-full w-auto max-w-[120px] object-contain" />
+                <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center p-2 shadow-lg shadow-primary/30">
+                  <img src="/ALPAMED-nobg.png" alt="Alpamed" className="w-full h-full object-contain" />
                 </div>
-                <h1 className="text-slate-900 dark:text-white font-bold text-xl leading-tight">Alpamed</h1>
+                <div>
+                  <h1 className="text-slate-900 dark:text-white font-bold text-lg leading-tight">Alpamed</h1>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs">Panel Administrativo</p>
+                </div>
               </div>
               <button onClick={() => {
                 if (document.documentElement.classList.contains('dark')) {
@@ -176,12 +179,11 @@ export default function Home() {
                   document.documentElement.classList.add('dark');
                   localStorage.setItem('theme', 'dark');
                 }
-              }} className="p-2 hidden md:block text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 rounded-xl transition-colors">
+              }} className="p-2 hidden md:block text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-white bg-slate-100 dark:bg-slate-800 rounded-xl transition-colors border border-slate-200 dark:border-slate-700">
                 <span className="block dark:hidden">🌙</span>
                 <span className="hidden dark:block">☀️</span>
               </button>
             </div>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">Panel Administrativo</p>
           </div>
 
           {/* Nav */}
@@ -191,7 +193,7 @@ export default function Home() {
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
                 view === "dashboard"
                   ? "bg-primary/20 text-primary border border-primary/30"
-                  : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800 hover:text-slate-900 dark:text-white"
+                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800 hover:text-slate-900 dark:text-white"
               }`}
             >
               <Users className="w-5 h-5" />
@@ -202,7 +204,7 @@ export default function Home() {
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
                 view === "whatsapp"
                   ? "bg-primary/20 text-primary border border-primary/30"
-                  : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800 hover:text-slate-900 dark:text-white"
+                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800 hover:text-slate-900 dark:text-white"
               }`}
             >
               <Smartphone className="w-5 h-5" />
@@ -213,7 +215,7 @@ export default function Home() {
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
                 view === "messages"
                   ? "bg-primary/20 text-primary border border-primary/30"
-                  : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800 hover:text-slate-900 dark:text-white"
+                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800 hover:text-slate-900 dark:text-white"
               }`}
             >
               <Send className="w-5 h-5" />
@@ -224,7 +226,7 @@ export default function Home() {
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
                 view === "appointments"
                   ? "bg-primary/20 text-primary border border-primary/30"
-                  : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800 hover:text-slate-900 dark:text-white"
+                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800 hover:text-slate-900 dark:text-white"
               }`}
             >
               <Calendar className="w-5 h-5" />
@@ -235,7 +237,7 @@ export default function Home() {
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
                 view === "calendar"
                   ? "bg-primary/20 text-primary border border-primary/30"
-                  : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800 hover:text-slate-900 dark:text-white"
+                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800 hover:text-slate-900 dark:text-white"
               }`}
             >
               <CalendarDays className="w-5 h-5" />
@@ -246,7 +248,7 @@ export default function Home() {
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
                 view === "users"
                   ? "bg-primary/20 text-primary border border-primary/30"
-                  : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800 hover:text-slate-900 dark:text-white"
+                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800 hover:text-slate-900 dark:text-white"
               }`}
             >
               <Shield className="w-5 h-5" />
@@ -257,7 +259,7 @@ export default function Home() {
           {/* Stats & Actions */}
           <div className="p-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
             <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3">
-              <p className="text-slate-500 text-xs">Total Pacientes</p>
+              <p className="text-slate-600 text-xs">Total Pacientes</p>
               <p className="text-slate-900 dark:text-white text-2xl font-bold">{profiles.length}</p>
             </div>
             
@@ -287,11 +289,11 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
                 <div>
                   <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Perfiles de Pacientes</h2>
-                  <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-1 sm:mt-0">Gestiona expedientes y mensajes con IA</p>
+                  <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm mt-1 sm:mt-0">Gestiona expedientes y mensajes con IA</p>
                 </div>
                 <Link
                   href="/profiles/new"
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary hover:bg-primary text-slate-900 dark:text-white font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl transition-all shadow-lg shadow-primary/30 active:scale-95"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary hover:opacity-90 text-white font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl transition-all shadow-lg shadow-primary/30 active:scale-95"
                 >
                   <Plus className="w-5 h-5" />
                   <span>Nuevo Perfil</span>
@@ -308,7 +310,7 @@ export default function Home() {
                         key={f}
                         onClick={() => { setFilter(f); }}
                         className={`flex-1 lg:flex-none px-3 sm:px-4 py-2 rounded-lg text-[10px] sm:text-xs font-medium transition-all whitespace-nowrap ${
-                          filter === f ? "bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 hover:text-slate-700 dark:text-slate-300"
+                          filter === f ? "bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm" : "text-slate-600 hover:text-slate-700 dark:text-slate-300"
                         }`}
                       >
                         {f === "active" ? "Activos" : f === "inactive" ? "Inactivos" : "Todos"}
@@ -318,13 +320,13 @@ export default function Home() {
 
                   {/* Search Bar */}
                   <div className="relative w-full lg:w-72">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
                     <input
                       type="text"
                       placeholder="Buscar paciente..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700/50 rounded-xl py-2 sm:py-2.5 pl-10 pr-4 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                      className="w-full bg-slate-50 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700/50 rounded-xl py-2 sm:py-2.5 pl-10 pr-4 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                     />
                   </div>
                 </div>
@@ -343,11 +345,11 @@ export default function Home() {
                   <div className="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Users className="w-10 h-10 text-slate-600" />
                   </div>
-                  <p className="text-slate-500 dark:text-slate-400 text-lg font-medium">Sin perfiles aún</p>
+                  <p className="text-slate-600 dark:text-slate-400 text-lg font-medium">Sin perfiles aún</p>
                   <p className="text-slate-600 mt-2 mb-6">Crea el primer expediente de paciente para comenzar.</p>
                   <Link
                     href="/profiles/new"
-                    className="inline-flex items-center gap-2 bg-primary hover:bg-primary text-slate-900 dark:text-white font-semibold px-6 py-3 rounded-xl transition-all"
+                    className="inline-flex items-center gap-2 bg-primary hover:opacity-90 text-white font-semibold px-6 py-3 rounded-xl transition-all"
                   >
                     <Plus className="w-5 h-5" /> Crear primer perfil
                   </Link>
@@ -375,17 +377,17 @@ export default function Home() {
                       {/* Card Header */}
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 transition-colors  to-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-                            <span className="text-slate-900 dark:text-white text-xl font-bold">
+                          <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+                            <span className="text-white text-xl font-bold">
                               {profile.patientName.charAt(0).toUpperCase()}
                             </span>
                           </div>
                           <div>
-                            <h3 className={`font-semibold ${profile.active ? 'text-slate-900 dark:text-white' : 'text-slate-500 line-through'}`}>{profile.patientName}</h3>
+                            <h3 className={`font-semibold ${profile.active ? 'text-slate-900 dark:text-white' : 'text-slate-600 line-through'}`}>{profile.patientName}</h3>
                             <div className="flex items-center gap-2">
-                              <p className="text-slate-500 dark:text-slate-400 text-sm">+{profile.phone}</p>
+                              <p className="text-slate-600 dark:text-slate-400 text-sm">+{profile.phone}</p>
                               {!profile.active && (
-                                <span className="text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded uppercase font-bold tracking-wider">Inactivo</span>
+                                <span className="text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded uppercase font-bold tracking-wider">Inactivo</span>
                               )}
                             </div>
                           </div>
@@ -395,7 +397,7 @@ export default function Home() {
                           className={`p-2 rounded-lg transition-all border z-20 ${
                             profile.active 
                               ? 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/20' 
-                              : 'bg-slate-200 dark:bg-slate-700/50 text-slate-500 border-slate-300 dark:border-slate-700 hover:text-primary hover:bg-primary/10'
+                              : 'bg-slate-200 dark:bg-slate-700/50 text-slate-600 border-slate-300 dark:border-slate-700 hover:text-primary hover:bg-primary/10'
                           }`}
                           title={profile.active ? "Desactivar paciente" : "Activar paciente"}
                         >
@@ -408,30 +410,30 @@ export default function Home() {
                         {profile.realAge && (
                           <div className="bg-slate-200 dark:bg-slate-700/50 rounded-lg p-1.5 sm:p-2 text-center">
                             <p className="text-primary font-bold text-base sm:text-lg">{profile.realAge}</p>
-                            <p className="text-slate-500 text-[10px]">Edad</p>
+                            <p className="text-slate-600 text-[10px]">Edad</p>
                           </div>
                         )}
                         {profile.currentWeight && (
                           <div className="bg-slate-200 dark:bg-slate-700/50 rounded-lg p-1.5 sm:p-2 text-center">
                             <p className="text-primary font-bold text-base sm:text-lg">{profile.currentWeight}</p>
-                            <p className="text-slate-500 text-[10px]">Peso kg</p>
+                            <p className="text-slate-600 text-[10px]">Peso kg</p>
                           </div>
                         )}
                         {profile.bmi && (
                           <div className="bg-slate-200 dark:bg-slate-700/50 rounded-lg p-1.5 sm:p-2 text-center">
                             <p className="text-primary font-bold text-base sm:text-lg">{profile.bmi}</p>
-                            <p className="text-slate-500 text-[10px]">IMC</p>
+                            <p className="text-slate-600 text-[10px]">IMC</p>
                           </div>
                         )}
                       </div>
 
                       {/* Tags */}
                       <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
-                        <span className={`text-[10px] sm:text-xs px-2 py-1 rounded-full whitespace-nowrap ${profile.doesExercise ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'}`}>
+                        <span className={`text-[10px] sm:text-xs px-2 py-1 rounded-full whitespace-nowrap ${profile.doesExercise ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400'}`}>
                           {profile.doesExercise ? `💪 ${profile.exerciseType || "Hace ejercicio"}` : "Sin ejercicio"}
                         </span>
                         {profile._count && (
-                          <span className="text-[10px] sm:text-xs px-2 py-1 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 flex items-center gap-1 whitespace-nowrap">
+                          <span className="text-[10px] sm:text-xs px-2 py-1 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400 flex items-center gap-1 whitespace-nowrap">
                             <MessageSquare className="w-3 h-3" />
                             {profile._count.messages}
                           </span>
@@ -580,7 +582,7 @@ function WhatsAppSection() {
       <div className="w-full max-w-lg">
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white">WhatsApp</h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Vincula tu cuenta y envía mensajes personalizados con IA</p>
+          <p className="text-slate-600 dark:text-slate-400 mt-1">Vincula tu cuenta y envía mensajes personalizados con IA</p>
         </div>
 
         <div className="bg-slate-50 dark:bg-slate-800/60 backdrop-blur border border-slate-300 dark:border-slate-700/50 rounded-2xl overflow-hidden">
@@ -596,7 +598,7 @@ function WhatsAppSection() {
           <div className="p-6">
             {status === "idle" && (
               <div className="text-center space-y-4">
-                <p className="text-slate-500 dark:text-slate-400">Conecta tu cuenta de WhatsApp para enviar recomendaciones automáticas.</p>
+                <p className="text-slate-600 dark:text-slate-400">Conecta tu cuenta de WhatsApp para enviar recomendaciones automáticas.</p>
                 <button
                   onClick={() => { setStatus("loading"); socket?.emit("start-connection"); }}
                   className="w-full bg-primary hover:bg-primary text-slate-900 dark:text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-lg shadow-primary/30"
@@ -636,7 +638,7 @@ function WhatsAppSection() {
                     <div className="absolute top-0 right-0 w-4 h-4 bg-primary rounded-full border-2 border-slate-200 dark:border-slate-800" />
                   </div>
                   <h4 className="text-slate-900 dark:text-white font-semibold">¡Conexión Exitosa!</h4>
-                  <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">El bot está listo para enviar mensajes.</p>
+                  <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">El bot está listo para enviar mensajes.</p>
                 </div>
 
                 <div className="bg-slate-200 dark:bg-slate-700/50 rounded-xl p-4 space-y-3">
@@ -654,7 +656,7 @@ function WhatsAppSection() {
                   <button
                     onClick={handleSendMessage}
                     disabled={!selectedProfileId || sendMessageStatus.loading}
-                    className="w-full bg-primary hover:bg-primary disabled:bg-slate-600 disabled:text-slate-500 dark:text-slate-400 text-slate-900 dark:text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-primary/20"
+                    className="w-full bg-primary hover:bg-primary disabled:bg-slate-600 disabled:text-slate-600 dark:text-slate-400 text-slate-900 dark:text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-primary/20"
                   >
                     {sendMessageStatus.loading ? "Generando y enviando..." : "🤖 Enviar Mensaje con IA"}
                   </button>
@@ -824,7 +826,7 @@ function MessagesSection() {
     <div className="p-4 sm:p-6 md:p-8">
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Central de Mensajes</h2>
-        <p className="text-slate-500 dark:text-slate-400 mt-1">Envía recordatorios de citas y recomendaciones masivas a tus pacientes</p>
+        <p className="text-slate-600 dark:text-slate-400 mt-1">Envía recordatorios de citas y recomendaciones masivas a tus pacientes</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -836,7 +838,7 @@ function MessagesSection() {
             </div>
             <div>
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">Recordatorios de Citas</h3>
-              <p className="text-slate-500 dark:text-slate-400 text-sm">Citas pendientes en agenda</p>
+              <p className="text-slate-600 dark:text-slate-400 text-sm">Citas pendientes en agenda</p>
             </div>
           </div>
           <p className="text-slate-700 dark:text-slate-300 text-sm mb-6">Esta acción enviará un mensaje recordatorio automático a todos los pacientes que tienen una cita programada y en estado "pendiente".</p>
@@ -851,7 +853,7 @@ function MessagesSection() {
 
           {reminderStatus.isSending && (
             <div className="mt-4 bg-white dark:bg-slate-900/50 rounded-xl p-4 animate-pulse">
-              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-2">
+              <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 mb-2">
                 <span>Enviando a: <span className="text-primary">{reminderStatus.lastPatient}</span></span>
                 <span className="font-bold">{reminderStatus.current} / {reminderStatus.total}</span>
               </div>
@@ -879,7 +881,7 @@ function MessagesSection() {
             </div>
             <div>
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">Recomendación Diaria</h3>
-              <p className="text-slate-500 dark:text-slate-400 text-sm">Envío masivo con IA</p>
+              <p className="text-slate-600 dark:text-slate-400 text-sm">Envío masivo con IA</p>
             </div>
           </div>
           <p className="text-slate-700 dark:text-slate-300 text-sm mb-6">La Inteligencia Artificial redactará una recomendación personalizada única para cada paciente basándose en sus hábitos actuales.</p>
@@ -894,7 +896,7 @@ function MessagesSection() {
 
           {broadcastStatus.isBroadcasting && (
             <div className="mt-4 bg-white dark:bg-slate-900/50 rounded-xl p-4 animate-pulse">
-              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-2">
+              <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 mb-2">
                 <span>Procesando envíos...</span>
                 <span className="font-bold">{broadcastStatus.current} / {broadcastStatus.total}</span>
               </div>
@@ -905,7 +907,7 @@ function MessagesSection() {
                 />
               </div>
               {broadcastStatus.latest && (
-                <p className="text-[10px] text-slate-500 italic truncate mt-2">
+                <p className="text-[10px] text-slate-600 italic truncate mt-2">
                   Último: {broadcastStatus.latest.patientName} - {broadcastStatus.latest.status === 'sent' ? '✅' : '❌'}
                 </p>
               )}
@@ -1073,7 +1075,7 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Gestión de Citas</h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Programa y organiza las consultas</p>
+          <p className="text-slate-600 dark:text-slate-400 mt-1">Programa y organiza las consultas</p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button
@@ -1092,7 +1094,7 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
               <h3 className="text-slate-900 dark:text-white font-bold text-lg">{editingId ? "Editar Cita" : "Nueva Cita"}</h3>
-              <button onClick={resetForm} className="text-slate-500 hover:text-slate-900 dark:text-white"><X className="w-6 h-6" /></button>
+              <button onClick={resetForm} className="text-slate-600 hover:text-slate-900 dark:text-white"><X className="w-6 h-6" /></button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
@@ -1171,7 +1173,7 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
       ) : appointments.length === 0 ? (
         <div className="text-center py-24 bg-slate-50 dark:bg-slate-800/40 rounded-3xl border border-slate-300 dark:border-slate-700/50">
           <Calendar className="w-16 h-16 text-slate-700 mx-auto mb-4" />
-          <p className="text-slate-500 dark:text-slate-400 text-lg font-medium">No hay citas programadas</p>
+          <p className="text-slate-600 dark:text-slate-400 text-lg font-medium">No hay citas programadas</p>
           <p className="text-slate-600 mt-2">Personaliza tu agenda agendando la primera cita.</p>
         </div>
       ) : (
@@ -1194,7 +1196,7 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
                   </div>
                   <div>
                     <h3 className="text-slate-900 dark:text-white font-semibold leading-tight">{app.profile.patientName}</h3>
-                    <div className="flex items-center gap-1.5 text-slate-500 text-xs mt-1">
+                    <div className="flex items-center gap-1.5 text-slate-600 text-xs mt-1">
                       <Clock className="w-3 h-3" />
                       {new Date(app.date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
                     </div>
@@ -1205,11 +1207,11 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
 
               <div className="bg-white dark:bg-slate-900/50 rounded-xl p-3 mb-4">
                 <p className="text-slate-700 dark:text-slate-300 text-sm font-medium">Motivo:</p>
-                <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5 line-clamp-1">{app.reason}</p>
+                <p className="text-slate-600 dark:text-slate-400 text-sm mt-0.5 line-clamp-1">{app.reason}</p>
               </div>
 
               {app.notes && (
-                <p className="text-[11px] text-slate-500 italic mb-4 line-clamp-2">📝 {app.notes}</p>
+                <p className="text-[11px] text-slate-600 italic mb-4 line-clamp-2">📝 {app.notes}</p>
               )}
 
               <div className="flex gap-2 pt-3 border-t border-slate-300 dark:border-slate-700/50">
@@ -1250,14 +1252,14 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
                 )}
 
                 {app.status === 'caducada' && (
-                  <div className="flex-1 text-center py-2 bg-slate-200 dark:bg-slate-700/20 text-slate-500 text-[10px] uppercase font-bold rounded-lg border border-slate-300 dark:border-slate-700/50">
+                  <div className="flex-1 text-center py-2 bg-slate-200 dark:bg-slate-700/20 text-slate-600 text-[10px] uppercase font-bold rounded-lg border border-slate-300 dark:border-slate-700/50">
                     Cita Caducada
                   </div>
                 )}
 
                 <button
                   onClick={() => handleDelete(app.id)}
-                  className="p-2 bg-slate-200 dark:bg-slate-700/30 hover:bg-red-500/10 text-slate-500 hover:text-red-400 rounded-lg transition-all border border-slate-300 dark:border-slate-700/50 hover:border-red-500/20"
+                  className="p-2 bg-slate-200 dark:bg-slate-700/30 hover:bg-red-500/10 text-slate-600 hover:text-red-400 rounded-lg transition-all border border-slate-300 dark:border-slate-700/50 hover:border-red-500/20"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -1376,7 +1378,7 @@ function CalendarSection({ onGoToAppointment }: { onGoToAppointment: (id: number
               ))}
             </select>
           </div>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">Navega rápidamente por tu agenda</p>
+          <p className="text-slate-600 dark:text-slate-400 text-sm">Navega rápidamente por tu agenda</p>
         </div>
         
         <div className="flex items-center justify-between bg-white dark:bg-slate-900/80 p-1.5 rounded-2xl border border-slate-300 dark:border-slate-700/50 shadow-lg w-full sm:w-auto">
@@ -1397,7 +1399,7 @@ function CalendarSection({ onGoToAppointment }: { onGoToAppointment: (id: number
         {/* Días de la semana */}
         <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
           {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(d => (
-            <div key={d} className="py-3 text-center text-[10px] uppercase font-bold tracking-widest text-slate-500">{d}</div>
+            <div key={d} className="py-3 text-center text-[10px] uppercase font-bold tracking-widest text-slate-600">{d}</div>
           ))}
         </div>
 
@@ -1434,7 +1436,7 @@ function CalendarSection({ onGoToAppointment }: { onGoToAppointment: (id: number
                   dayStatus === 'pendiente' ? 'text-amber-400' :
                   dayStatus === 'caducada' ? 'text-rose-400' :
                   dayStatus === 'completada' ? 'text-primary' :
-                  'text-slate-500 dark:text-slate-400'
+                  'text-slate-600 dark:text-slate-400'
                 }`}>
                   {date.getDate()}
                 </span>
@@ -1451,9 +1453,9 @@ function CalendarSection({ onGoToAppointment }: { onGoToAppointment: (id: number
             <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/20">
               <div>
                 <h3 className="text-slate-900 dark:text-white font-bold text-lg">Citas del Día</h3>
-                <p className="text-slate-500 dark:text-slate-400 text-sm">{new Date(selectedDayApps[0].date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+                <p className="text-slate-600 dark:text-slate-400 text-sm">{new Date(selectedDayApps[0].date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
               </div>
-              <button onClick={() => setSelectedDayApps(null)} className="text-slate-500 hover:text-slate-900 dark:text-white p-2 hover:bg-slate-50 dark:bg-slate-800 rounded-xl transition-all">
+              <button onClick={() => setSelectedDayApps(null)} className="text-slate-600 hover:text-slate-900 dark:text-white p-2 hover:bg-slate-50 dark:bg-slate-800 rounded-xl transition-all">
                 <X className="w-6 h-6" />
               </button>
             </div>
@@ -1470,7 +1472,7 @@ function CalendarSection({ onGoToAppointment }: { onGoToAppointment: (id: number
                     </div>
                     <div>
                       <h4 className="text-slate-900 dark:text-white font-semibold group-hover:text-primary transition-colors">{app.profile.patientName}</h4>
-                      <p className="text-slate-500 text-xs">{app.reason}</p>
+                      <p className="text-slate-600 text-xs">{app.reason}</p>
                     </div>
                   </div>
                   <StatusBadge status={app.status} />
@@ -1480,7 +1482,7 @@ function CalendarSection({ onGoToAppointment }: { onGoToAppointment: (id: number
             <div className="p-4 bg-slate-50 dark:bg-slate-800/30 text-center">
               <button 
                 onClick={() => setSelectedDayApps(null)}
-                className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white text-sm font-medium"
+                className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:text-white text-sm font-medium"
               >Cerrar</button>
             </div>
           </div>
@@ -1494,7 +1496,7 @@ function StatBadge({ label, value }: { label: string; value: string }) {
   return (
     <div className="text-center">
       <p className="text-primary font-bold text-lg leading-tight">{value}</p>
-      <p className="text-slate-500 text-xs mt-0.5">{label}</p>
+      <p className="text-slate-600 text-xs mt-0.5">{label}</p>
     </div>
   );
 }
@@ -1503,7 +1505,7 @@ function MiniStat({ label, value, unit = "", highlight = false }: { label: strin
   return (
     <div className="bg-slate-200 dark:bg-slate-700/40 rounded-lg p-2 text-center">
       <p className={`font-bold text-base leading-tight ${highlight ? "text-primary" : "text-slate-200"}`}>{value}{value !== "—" ? unit : ""}</p>
-      <p className="text-slate-500 text-xs mt-0.5">{label}</p>
+      <p className="text-slate-600 text-xs mt-0.5">{label}</p>
     </div>
   );
 }
@@ -1596,7 +1598,7 @@ function UsersSection() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Panel de Usuarios</h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Gestiona los accesos al sistema y registra a otros usuarios</p>
+          <p className="text-slate-600 dark:text-slate-400 mt-1">Gestiona los accesos al sistema y registra a otros usuarios</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
@@ -1622,10 +1624,10 @@ function UsersSection() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-slate-900 dark:text-white">{u.name || "Sin nombre"}</h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 truncate w-40">{u.email}</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 truncate w-40">{u.email}</p>
                   </div>
                 </div>
-                <div className="bg-white dark:bg-slate-900/50 rounded-lg p-3 text-sm text-slate-500 dark:text-slate-400">
+                <div className="bg-white dark:bg-slate-900/50 rounded-lg p-3 text-sm text-slate-600 dark:text-slate-400">
                   Registrado el {new Date(u.createdAt).toLocaleDateString()}
                 </div>
               </div>
@@ -1662,7 +1664,7 @@ function UsersSection() {
                 <button
                   onClick={() => setShowModal(false)}
                   disabled={saving}
-                  className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 dark:bg-slate-700 rounded-lg transition-colors"
+                  className="p-1.5 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 dark:bg-slate-700 rounded-lg transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1675,7 +1677,7 @@ function UsersSection() {
                     required
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-500"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-600"
                     placeholder="Ej. Dr. Juan Pérez"
                   />
                 </div>
@@ -1686,7 +1688,7 @@ function UsersSection() {
                     required
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-500"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-600"
                     placeholder="correo@ejemplo.com"
                   />
                 </div>
@@ -1699,13 +1701,13 @@ function UsersSection() {
                       minLength={6}
                       value={form.password}
                       onChange={(e) => setForm({ ...form, password: e.target.value })}
-                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-500 pr-10"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-600 pr-10"
                       placeholder="Mínimo 6 caracteres"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors"
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-600 dark:text-slate-400 hover:text-primary transition-colors"
                     >
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
