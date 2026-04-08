@@ -85,10 +85,10 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-5xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-2xl overflow-y-auto max-h-[90vh] print:max-h-none print:shadow-none print:border-none print:w-full print:bg-white print:m-0 print:absolute print:inset-0"
+          className="relative w-full max-w-5xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-2xl overflow-y-auto max-h-[90vh] print:max-h-none print:shadow-none print:border-none print:w-full print:bg-white print:m-0 print:static print:transform-none"
         >
           {/* Header */}
-          <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r /10 to-primary/10 no-print">
+          <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r /10 to-primary/10 print:hidden">
             <div className="flex items-center gap-3 sm:gap-4 min-w-0">
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30 shrink-0">
                 <User className="w-5 h-5 sm:w-6 sm:h-6 text-slate-900 dark:text-white" />
@@ -185,27 +185,25 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
               </table>
             </div>
 
-            {/* Print Chart */}
-            <div className="mb-6 h-[220px] w-full text-slate-900 border border-slate-200 rounded-lg p-3">
-              <h3 className="font-bold border-b border-slate-200 pb-1 mb-3 uppercase text-[10px] tracking-wider text-slate-500">Progreso Gráfico ({historyLimit === 'all' ? 'Todo' : historyLimit} registros)</h3>
-              <ResponsiveContainer width="100%" height="80%">
-                <AreaChart data={chartData}>
-                  <defs>
-                    <linearGradient id="colorPesoP" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#2CB7B3" stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor="#2CB7B3" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                  <XAxis dataKey="fecha" stroke="#64748b" fontSize={9} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#64748b" fontSize={9} tickLine={false} axisLine={false} />
-                  <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', paddingTop: '5px' }} />
-                  <Area type="monotone" dataKey="peso" name="Peso (kg)" stroke="#2CB7B3" strokeWidth={2} fillOpacity={1} fill="url(#colorPesoP)" />
-                  <Line type="monotone" dataKey="grasa" name="Grasa (%)" stroke="#f43f5e" strokeWidth={2} dot={{ r: 2 }} />
-                  <Line type="monotone" dataKey="musculo" name="Músculo (%)" stroke="#3b82f6" strokeWidth={2} dot={{ r: 2 }} />
-                  <Line type="monotone" dataKey="edadMet" name="Edad Met." stroke="#8b5cf6" strokeWidth={2} dot={{ r: 2 }} />
-                </AreaChart>
-              </ResponsiveContainer>
+            {/* Print Chart - Usando tamaño fijo para asegurar que Recharts lo dibuje */}
+            <div className="mb-6 h-[220px] w-[700px] text-slate-900 border border-slate-200 rounded-lg p-4">
+              <h3 className="font-bold border-b border-slate-200 pb-1 mb-2 uppercase text-[10px] tracking-wider text-slate-500">Progreso Gráfico ({historyLimit === 'all' ? 'Todo' : historyLimit} registros)</h3>
+              <AreaChart width={660} height={160} data={chartData}>
+                <defs>
+                  <linearGradient id="colorPesoP" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2CB7B3" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#2CB7B3" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                <XAxis dataKey="fecha" stroke="#64748b" fontSize={9} tickLine={false} axisLine={false} />
+                <YAxis stroke="#64748b" fontSize={9} tickLine={false} axisLine={false} />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', paddingTop: '5px' }} />
+                <Area type="monotone" dataKey="peso" name="Peso (kg)" stroke="#2CB7B3" strokeWidth={2} fillOpacity={1} fill="url(#colorPesoP)" />
+                <Line type="monotone" dataKey="grasa" name="Grasa (%)" stroke="#f43f5e" strokeWidth={2} dot={{ r: 2 }} />
+                <Line type="monotone" dataKey="musculo" name="Músculo (%)" stroke="#3b82f6" strokeWidth={2} dot={{ r: 2 }} />
+                <Line type="monotone" dataKey="edadMet" name="Edad Met." stroke="#8b5cf6" strokeWidth={2} dot={{ r: 2 }} />
+              </AreaChart>
             </div>
 
             {profile.generalRecommendation && (
@@ -220,7 +218,7 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
             </div>
           </div>
 
-          <div className="p-4 sm:p-6 space-y-6 sm:space-y-8 no-print">
+          <div className="p-4 sm:p-6 space-y-6 sm:space-y-8 print:hidden">
             {/* Main Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <MetricCard 
@@ -372,30 +370,9 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
             margin: 1.5cm;
             size: A4 portrait;
           }
-          /* Ocultar todo por defecto usando visibilidad */
-          body * {
-            visibility: hidden;
-          }
-          /* Mostrar SOLO el contenido del reporte */
-          .print-content, .print-content * {
-            visibility: visible !important;
-          }
-          .print-content {
-            display: block !important;
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-          }
           /* Evitar cortes a la mitad en la tabla */
-          .print-content tr {
+          tr {
             page-break-inside: avoid;
-          }
-          /* Ocultar elementos interactivos */
-          .no-print {
-            display: none !important;
           }
         }
       `}</style>

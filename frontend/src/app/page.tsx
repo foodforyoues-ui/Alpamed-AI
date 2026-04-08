@@ -123,7 +123,7 @@ export default function Home() {
     <div className="min-h-screen transition-colors    flex flex-col md:flex-row">
       
       {/* Mobile Top Bar */}
-      <div className="md:hidden flex items-center justify-between p-4 bg-white dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 backdrop-blur-sm sticky top-0 z-40">
+      <div className="print:hidden md:hidden flex items-center justify-between p-4 bg-white dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 backdrop-blur-sm sticky top-0 z-40">
         <div className="flex items-center gap-2">
           <div className="w-2.5 h-2.5 rounded-full bg-primary" />
           <h1 className="text-slate-900 dark:text-white font-bold text-lg leading-tight">Alpamed</h1>
@@ -156,7 +156,7 @@ export default function Home() {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed md:relative inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 md:bg-white dark:bg-slate-900/80 border-r border-slate-200 dark:border-slate-800 flex flex-col backdrop-blur-sm transition-transform duration-300 ease-in-out md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`print:hidden fixed md:relative inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 md:bg-white dark:bg-slate-900/80 border-r border-slate-200 dark:border-slate-800 flex flex-col backdrop-blur-sm transition-transform duration-300 ease-in-out md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         {/* Logo */}
           <div className="p-5 border-b border-slate-200 dark:border-slate-800">
             <div className="flex items-center justify-between">
@@ -275,7 +275,7 @@ export default function Home() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto">
+        <main className="print:hidden flex-1 overflow-auto">
           <AnimatePresence mode="wait">
           {view === "dashboard" && (
             <motion.div 
