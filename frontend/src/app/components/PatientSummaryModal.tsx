@@ -160,7 +160,7 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
             </div>
 
             <div className="mb-6 text-slate-900">
-              <h3 className="font-bold border-b border-slate-200 pb-1 mb-3 uppercase text-[10px] tracking-wider text-slate-500">Historial Reciente (Últimos 6 seguimientos)</h3>
+              <h3 className="font-bold border-b border-slate-200 pb-1 mb-3 uppercase text-[10px] tracking-wider text-slate-500">Historial Reciente (Últimos 5 seguimientos)</h3>
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-50 uppercase text-[9px] tracking-widest font-black">
@@ -172,7 +172,7 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
                   </tr>
                 </thead>
                 <tbody>
-                  {profile.snapshots.slice(0, 6).map(s => (
+                  {profile.snapshots.slice(0, 5).map(s => (
                     <tr key={s.id} className="border-b">
                       <td className="p-2 border border-slate-300">{new Date(s.recordedAt).toLocaleDateString()}</td>
                       <td className="p-2 border border-slate-300 font-bold">{s.weight}</td>
@@ -373,13 +373,10 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
             size: A4 portrait;
           }
           /* Ocultar todo por defecto usando visibilidad */
-          body {
+          body * {
             visibility: hidden;
-            background: white !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
           }
-          /* Mostrar SOLO el contenido del reporte y asegurar que se imprima compacto */
+          /* Mostrar SOLO el contenido del reporte */
           .print-content, .print-content * {
             visibility: visible !important;
           }
@@ -391,19 +388,14 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
             width: 100% !important;
             margin: 0 !important;
             padding: 0 !important;
-            background: white !important;
-            page-break-after: avoid;
-            page-break-before: avoid;
           }
-          /* Prevenir saltos de pagina por elementos hijos */
-          .print-content tr, .print-content div {
+          /* Evitar cortes a la mitad en la tabla */
+          .print-content tr {
             page-break-inside: avoid;
           }
-          /* Asegurar que nada más interfiera */
-          .no-print, [role="dialog"] > div:not(.print-content), .fixed, aside, main, header, footer {
+          /* Ocultar elementos interactivos */
+          .no-print {
             display: none !important;
-            border: none !important;
-            box-shadow: none !important;
           }
         }
       `}</style>
