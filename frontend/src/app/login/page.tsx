@@ -48,7 +48,10 @@ export default function LoginPage() {
         className="max-w-md w-full space-y-8 bg-white dark:bg-zinc-800 p-8 rounded-2xl shadow-lg border border-gray-100 dark:border-zinc-700"
       >
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+          <div className="mx-auto w-24 h-24 bg-white rounded-2xl flex items-center justify-center p-3 shadow-md border border-slate-200 dark:border-slate-300 mb-4">
+            <img src="/ALPAMED-nobg.png" alt="Alpamed Logo" className="w-full h-full object-contain" />
+          </div>
+          <h2 className="text-center text-3xl font-extrabold text-gray-900 dark:text-white">
             Alpamed
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">

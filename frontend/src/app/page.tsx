@@ -124,10 +124,8 @@ export default function Home() {
       
       {/* Mobile Top Bar */}
       <div className="md:hidden flex items-center justify-between p-4 bg-white dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 backdrop-blur-sm sticky top-0 z-40">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center p-1.5 shadow-md">
-            <img src="/ALPAMED-nobg.png" alt="Alpamed" className="w-full h-full object-contain" />
-          </div>
+        <div className="flex items-center gap-2">
+          <div className="w-2.5 h-2.5 rounded-full bg-primary" />
           <h1 className="text-slate-900 dark:text-white font-bold text-lg leading-tight">Alpamed</h1>
         </div>
         <div className="flex items-center gap-2">
@@ -163,7 +161,7 @@ export default function Home() {
           <div className="p-5 border-b border-slate-200 dark:border-slate-800">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center p-2 shadow-lg shadow-primary/30">
+                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center p-1.5 shadow-md border border-slate-200 dark:border-slate-300">
                   <img src="/ALPAMED-nobg.png" alt="Alpamed" className="w-full h-full object-contain" />
                 </div>
                 <div>
