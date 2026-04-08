@@ -54,7 +54,7 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
       peso: s.weight,
       grasa: s.bodyFatPercentage,
       musculo: s.muscleMassPercentage,
-      imc: s.bmi
+      edadMet: s.metabolicAge
     }));
   }, [profile.snapshots, historyLimit]);
 
@@ -185,6 +185,29 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
               </table>
             </div>
 
+            {/* Print Chart */}
+            <div className="mb-6 h-[220px] w-full text-slate-900 border border-slate-200 rounded-lg p-3">
+              <h3 className="font-bold border-b border-slate-200 pb-1 mb-3 uppercase text-[10px] tracking-wider text-slate-500">Progreso Gráfico ({historyLimit === 'all' ? 'Todo' : historyLimit} registros)</h3>
+              <ResponsiveContainer width="100%" height="80%">
+                <AreaChart data={chartData}>
+                  <defs>
+                    <linearGradient id="colorPesoP" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#2CB7B3" stopOpacity={0.1}/>
+                      <stop offset="95%" stopColor="#2CB7B3" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                  <XAxis dataKey="fecha" stroke="#64748b" fontSize={9} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#64748b" fontSize={9} tickLine={false} axisLine={false} />
+                  <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', paddingTop: '5px' }} />
+                  <Area type="monotone" dataKey="peso" name="Peso (kg)" stroke="#2CB7B3" strokeWidth={2} fillOpacity={1} fill="url(#colorPesoP)" />
+                  <Line type="monotone" dataKey="grasa" name="Grasa (%)" stroke="#f43f5e" strokeWidth={2} dot={{ r: 2 }} />
+                  <Line type="monotone" dataKey="musculo" name="Músculo (%)" stroke="#3b82f6" strokeWidth={2} dot={{ r: 2 }} />
+                  <Line type="monotone" dataKey="edadMet" name="Edad Met." stroke="#8b5cf6" strokeWidth={2} dot={{ r: 2 }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+
             {profile.generalRecommendation && (
               <div className="bg-slate-50 border border-slate-300 p-4 rounded-lg mb-6 text-slate-900">
                 <h3 className="font-bold uppercase text-[9px] tracking-widest text-slate-500 mb-2">Recomendación General</h3>
@@ -284,6 +307,22 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
                       strokeWidth={2}
                       dot={{ r: 4, fill: '#f43f5e', strokeWidth: 2, stroke: '#0f172a' }}
                     />
+                    <Line 
+                      type="monotone" 
+                      dataKey="musculo" 
+                      name="Músculo (%)" 
+                      stroke="#3b82f6" 
+                      strokeWidth={2}
+                      dot={{ r: 4, fill: '#3b82f6', strokeWidth: 2, stroke: '#0f172a' }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="edadMet" 
+                      name="Edad Met." 
+                      stroke="#8b5cf6" 
+                      strokeWidth={2}
+                      dot={{ r: 4, fill: '#8b5cf6', strokeWidth: 2, stroke: '#0f172a' }}
+                    />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -330,15 +369,17 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
       <style jsx global>{`
         @media print {
           @page {
-            margin: 0;
+            margin: 1.5cm;
             size: A4 portrait;
           }
           /* Ocultar todo por defecto usando visibilidad */
           body {
             visibility: hidden;
             background: white !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
-          /* Mostrar SOLO el contenido del reporte */
+          /* Mostrar SOLO el contenido del reporte y asegurar que se imprima compacto */
           .print-content, .print-content * {
             visibility: visible !important;
           }
@@ -349,11 +390,18 @@ export default function PatientSummaryModal({ profile, onClose }: PatientSummary
             top: 0 !important;
             width: 100% !important;
             margin: 0 !important;
-            padding: 1.5cm !important;
+            padding: 0 !important;
             background: white !important;
+            page-break-after: avoid;
+            page-break-before: avoid;
+          }
+          /* Prevenir saltos de pagina por elementos hijos */
+          .print-content tr, .print-content div {
+            page-break-inside: avoid;
           }
           /* Asegurar que nada más interfiera */
           .no-print, [role="dialog"] > div:not(.print-content), .fixed, aside, main, header, footer {
+            display: none !important;
             border: none !important;
             box-shadow: none !important;
           }
