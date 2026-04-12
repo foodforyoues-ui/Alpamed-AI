@@ -162,7 +162,7 @@ export default function Home() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center p-1.5 shadow-md border border-slate-200 dark:border-slate-300">
-                  <img src="/ALPAMED-nobg.png" alt="Alpamed" className="w-full h-full object-contain" />
+                  <img src="/ALPAMED-logo.png" alt="Alpamed" className="w-full h-full object-contain" />
                 </div>
                 <div>
                   <h1 className="text-slate-900 dark:text-white font-bold text-lg leading-tight">Alpamed</h1>
@@ -1200,7 +1200,14 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
                     </div>
                   </div>
                 </div>
-                <StatusBadge status={app.status} />
+                <div className="flex flex-col items-end gap-1">
+                  <StatusBadge status={app.status} />
+                  {(app as any).isNextDay && (
+                    <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-500 border border-blue-500/30">
+                      Mañana
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div className="bg-white dark:bg-slate-900/50 rounded-xl p-3 mb-4">

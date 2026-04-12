@@ -19,7 +19,22 @@ export const getAppointments = async (req, res) => {
       include: { profile: true },
       orderBy: { date: 'asc' },
     });
-    res.json(appointments);
+
+    const tomorrow = new Date();
+    tomorrow.setDate(now.getDate() + 1);
+    const tomorrowStart = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 0, 0, 0, 0);
+    const tomorrowEnd = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 23, 59, 59, 999);
+
+    const markedAppointments = appointments.map(app => {
+      const appDate = new Date(app.date);
+      const isNextDay = appDate >= tomorrowStart && appDate <= tomorrowEnd;
+      return {
+        ...app,
+        isNextDay
+      };
+    });
+
+    res.json(markedAppointments);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
