@@ -162,7 +162,7 @@ export default function Home() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center p-1.5 shadow-md border border-slate-200 dark:border-slate-300">
-                  <img src="/ALPAMED-logo.png" alt="Alpamed" className="w-full h-full object-contain" />
+                  <img src="/ALPAMED-nobg.png" alt="Alpamed" className="w-full h-full object-contain" />
                 </div>
                 <div>
                   <h1 className="text-slate-900 dark:text-white font-bold text-lg leading-tight">Alpamed</h1>
