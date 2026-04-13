@@ -117,7 +117,7 @@ export default function SendMessagePage() {
                   <p className="font-medium text-slate-900 dark:text-slate-300 mb-2">¿Qué pasará al enviar?</p>
                   <ul className="space-y-1 list-disc list-inside">
                     <li>Azure OpenAI leerá el expediente completo</li>
-                    <li>Generará un mensaje personalizado con <img src="/ALPAMED-logo.png" alt="Alpamed" className="w-5 h-5 inline object-contain align-text-bottom" /></li>
+                    <li>Generará un mensaje personalizado con <img src="/alpalogo.png" alt="Alpamed" className="w-5 h-5 inline object-contain align-text-bottom" /></li>
                     <li>Lo enviará al +{profile?.phone} de {profile?.patientName}</li>
                     <li>Guardará el mensaje en el historial del perfil</li>
                   </ul>
