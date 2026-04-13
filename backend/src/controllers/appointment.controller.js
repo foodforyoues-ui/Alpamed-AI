@@ -117,7 +117,7 @@ export const sendAppointmentReminders = async (req, res) => {
   }
 
   try {
-    const pendingAppointments = await prisma.appointment.findMany({
+    const rawAppointments = await prisma.appointment.findMany({
       where: { 
         status: 'pendiente',
         profile: { active: true }
@@ -126,13 +126,23 @@ export const sendAppointmentReminders = async (req, res) => {
       orderBy: { date: 'asc' }
     });
 
-    if (pendingAppointments.length === 0) {
-      return res.status(200).json({ message: 'No hay citas pendientes para recordar' });
+    const nowSV = new Date(new Date().getTime() - (6 * 60 * 60 * 1000));
+    const svTomorrow = new Date(Date.UTC(nowSV.getUTCFullYear(), nowSV.getUTCMonth(), nowSV.getUTCDate() + 1));
+
+    const tomorrowAppointments = rawAppointments.filter(app => {
+      const appDateSV = new Date(new Date(app.date).getTime() - (6 * 60 * 60 * 1000));
+      return appDateSV.getUTCFullYear() === svTomorrow.getUTCFullYear() &&
+             appDateSV.getUTCMonth() === svTomorrow.getUTCMonth() &&
+             appDateSV.getUTCDate() === svTomorrow.getUTCDate();
+    });
+
+    if (tomorrowAppointments.length === 0) {
+      return res.status(200).json({ message: 'No hay citas para recordar mañana' });
     }
 
     res.status(202).json({ 
       message: 'Procesando recordatorios...',
-      total: pendingAppointments.length 
+      total: tomorrowAppointments.length 
     });
 
     // Procesar en segundo plano
@@ -142,24 +152,27 @@ export const sendAppointmentReminders = async (req, res) => {
       let failedCount = 0;
       const BATCH_SIZE = 5;
       
-      console.log(`Iniciando envío de ${pendingAppointments.length} recordatorios...`);
+      console.log(`Iniciando envío de ${tomorrowAppointments.length} recordatorios fijos...`);
 
-      for (let i = 0; i < pendingAppointments.length; i += BATCH_SIZE) {
-        const batch = pendingAppointments.slice(i, i + BATCH_SIZE);
+      const formatTimeSV = (dateUTC) => {
+        const d = new Date(new Date(dateUTC).getTime() - (6 * 60 * 60 * 1000));
+        let hours = d.getUTCHours();
+        const minutes = d.getUTCMinutes();
+        const ampm = hours >= 12 ? 'pm' : 'am';
+        hours = hours % 12 || 12;
+        const strMins = minutes > 0 ? `:${minutes < 10 ? '0'+minutes : minutes}` : '';
+        return `${hours}${strMins} ${ampm}`;
+      };
+
+      for (let i = 0; i < tomorrowAppointments.length; i += BATCH_SIZE) {
+        const batch = tomorrowAppointments.slice(i, i + BATCH_SIZE);
         
-        // Generar mensajes de IA en paralelo para el lote
-        const batchPromises = batch.map(async (app) => {
-          try {
-            console.log(`Generando recordatorio IA para: ${app.profile.patientName}...`);
-            const text = await generateAppointmentReminder(app.profile, app);
-            return { app, text, error: null };
-          } catch (err) {
-            console.error(`❌ Error IA para ${app.profile.patientName}:`, err.message);
-            return { app, text: null, error: err.message };
-          }
+        const batchResults = batch.map((app) => {
+          const firstName = app.profile.patientName.split(' ')[0];
+          const timeStr = formatTimeSV(app.date);
+          const text = `¡Hola ${firstName}! 🌟 Te recordamos tu cita de checkeo el dia de mañana a las ${timeStr}. Es un momento importante para cuidar de ti y tu bienestar, ¡vamos con toda la energía! 💪✨\n\nPor favor, confirma tu asistencia respondiendo a este mensaje. ¡Te esperamos con mucha alegría! 😊`;
+          return { app, text, error: null };
         });
-
-        const batchResults = await Promise.all(batchPromises);
 
         // Enviar por WhatsApp con delay
         for (const item of batchResults) {
@@ -175,16 +188,14 @@ export const sendAppointmentReminders = async (req, res) => {
               console.error(`❌ Error WhatsApp para ${app.profile.patientName}:`, err.message);
               failedCount++;
             }
-          } else {
-            failedCount++;
           }
 
           processedCount++;
           io.emit('appointment_reminder_progress', {
             current: processedCount,
-            total: pendingAppointments.length,
+            total: tomorrowAppointments.length,
             lastPatient: app.profile.patientName,
-            success: !error
+            success: true
           });
 
           // Delay de 1 segundo entre envíos físicos
