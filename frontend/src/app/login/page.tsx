@@ -5,6 +5,7 @@ import Cookies from "js-cookie";
 import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
