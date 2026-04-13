@@ -20,14 +20,18 @@ export const getAppointments = async (req, res) => {
       orderBy: { date: 'asc' },
     });
 
-    const tomorrow = new Date();
-    tomorrow.setDate(now.getDate() + 1);
-    const tomorrowStart = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 0, 0, 0, 0);
-    const tomorrowEnd = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 23, 59, 59, 999);
+    // Para evitar problemas de zona horaria con servidores en Europa (ej. europe-west4),
+    // calculamos las fechas usando matematicas absolutas en UTC para El Salvador (UTC-6).
+    const nowSV = new Date(now.getTime() - (6 * 60 * 60 * 1000));
+    const svTomorrow = new Date(Date.UTC(nowSV.getUTCFullYear(), nowSV.getUTCMonth(), nowSV.getUTCDate() + 1));
 
     const markedAppointments = appointments.map(app => {
-      const appDate = new Date(app.date);
-      const isNextDay = appDate >= tomorrowStart && appDate <= tomorrowEnd;
+      const appDateSV = new Date(new Date(app.date).getTime() - (6 * 60 * 60 * 1000));
+      const isNextDay = 
+        appDateSV.getUTCFullYear() === svTomorrow.getUTCFullYear() &&
+        appDateSV.getUTCMonth() === svTomorrow.getUTCMonth() &&
+        appDateSV.getUTCDate() === svTomorrow.getUTCDate();
+
       return {
         ...app,
         isNextDay
