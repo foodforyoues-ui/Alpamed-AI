@@ -103,6 +103,9 @@ export default function Home() {
   };
 
   useEffect(() => {
+    if (window.innerWidth >= 768) {
+      setIsSidebarOpen(true);
+    }
     fetchProfiles();
   }, []);
 
@@ -120,10 +123,10 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen transition-colors    flex flex-col md:flex-row">
+    <div className="h-screen w-full flex flex-col md:flex-row overflow-hidden transition-colors bg-white dark:bg-slate-900">
       
       {/* Mobile Top Bar */}
-      <div className="print:hidden md:hidden flex items-center justify-between p-4 bg-white dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 backdrop-blur-sm sticky top-0 z-40">
+      <div className="print:hidden md:hidden flex items-center justify-between p-4 bg-white dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 backdrop-blur-sm z-40 shrink-0">
         <div className="flex items-center gap-2">
           <div className="w-2.5 h-2.5 rounded-full bg-primary" />
           <h1 className="text-slate-900 dark:text-white font-bold text-lg leading-tight">Alpamed</h1>
@@ -147,18 +150,31 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Botón flotante Desktop para Abrir Sidebar */}
+      <button 
+        onClick={() => setIsSidebarOpen(true)}
+        className={`print:hidden hidden md:flex fixed top-5 left-5 z-40 items-center justify-center p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm rounded-xl text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-white transition-all duration-300 hover:scale-105 active:scale-95 ${isSidebarOpen ? 'opacity-0 pointer-events-none -translate-x-10' : 'opacity-100 translate-x-0'}`}
+      >
+        <Menu className="w-5 h-5" />
+      </button>
+
       {/* Overlay para móviles */}
-      {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
+      <div 
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300 ${isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        onClick={() => setIsSidebarOpen(false)}
+      />
 
       {/* Sidebar */}
-      <aside className={`print:hidden fixed md:relative inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 md:bg-white dark:bg-slate-900/80 border-r border-slate-200 dark:border-slate-800 flex flex-col backdrop-blur-sm transition-transform duration-300 ease-in-out md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`print:hidden fixed md:relative inset-y-0 left-0 z-50 bg-white dark:bg-slate-900 md:bg-white dark:bg-slate-900/80 border-r border-slate-200 dark:border-slate-800 flex flex-col backdrop-blur-sm transition-all duration-300 ease-in-out shrink-0 overflow-hidden ${isSidebarOpen ? "w-64 translate-x-0" : "w-64 md:w-0 -translate-x-full md:translate-x-0 md:border-r-0 md:opacity-0"}`}>
+        <div className="w-64 flex flex-col h-full shrink-0 relative">
+          <button 
+            onClick={() => setIsSidebarOpen(false)} 
+            className="absolute top-4 right-4 p-1.5 hidden md:flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-800 rounded-lg transition-colors border border-slate-200 dark:border-slate-700 z-10"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
         {/* Logo */}
-          <div className="p-5 border-b border-slate-200 dark:border-slate-800">
+          <div className="p-5 border-b border-slate-200 dark:border-slate-800 pt-7 md:pt-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center p-1.5 shadow-md border border-slate-200 dark:border-slate-300">
@@ -272,10 +288,11 @@ export default function Home() {
               <span className="text-sm">Cerrar Sesión</span>
             </button>
           </div>
+        </div>
         </aside>
 
         {/* Main Content */}
-        <main className="print:hidden flex-1 overflow-auto">
+        <main className="print:hidden flex-1 h-full overflow-y-auto w-full relative">
           <AnimatePresence mode="wait">
           {view === "dashboard" && (
             <motion.div 
