@@ -11,6 +11,9 @@ import messageRoutes from './src/routes/message.routes.js';
 import appointmentRoutes from './src/routes/appointment.routes.js';
 import authRoutes from './src/routes/auth.routes.js';
 import { requireAuth } from './src/middlewares/auth.middleware.js';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'nutria_super_secret_key_2026';
 
 const app = express();
 
@@ -64,23 +67,44 @@ app.get('/', (req, res) => {
 });
 
 // Iniciar sesión bajo demanda a través de Websockets
-io.on('connection', (socket) => {
-    console.log(`Cliente web conectado: ${socket.id}`);
+io.use((socket, next) => {
+    const token = socket.handshake.auth?.token;
+    if (!token) {
+        return next(new Error('Authentication error: Token missing'));
+    }
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        socket.user = decoded; // { id, email }
+        next();
+    } catch (e) {
+        return next(new Error('Authentication error: Invalid token'));
+    }
+});
 
-    // Devolver lista de sesiones
-    socket.emit('sessions_list', { sessions: getSavedSessions() });
+io.on('connection', (socket) => {
+    const userId = socket.user.id;
+    console.log(`Cliente web conectado: ${socket.id} (Usuario ID: ${userId})`);
+    
+    // Aislar al usuario en su propia sala
+    socket.join(`user_${userId}`);
+
+    // Devolver lista de sesiones del usuario particular
+    socket.emit('sessions_list', { sessions: getSavedSessions(userId) });
 
     socket.on('start-connection', ({ clientId }) => {
         if (!clientId) {
             socket.emit('error', { message: 'Se requiere un clientId' });
             return;
         }
-        if (!getClient(clientId)) {
-            initWhatsApp(clientId);
-        } else if (getIsReady(clientId)) {
+        
+        const realClientId = `user_${userId}_${clientId}`;
+        
+        if (!getClient(realClientId)) {
+            initWhatsApp(realClientId, userId);
+        } else if (getIsReady(realClientId)) {
             socket.emit('ready', { clientId, status: 'Ya conectado' });
         } else {
-            console.log(`El cliente ${clientId} ya está en proceso de inicio.`);
+            console.log(`El cliente ${realClientId} ya está en proceso de inicio.`);
         }
     });
 
@@ -91,7 +115,9 @@ io.on('connection', (socket) => {
             return;
         }
 
-        if (getClient(clientId) && getIsReady(clientId)) {
+        const realClientId = `user_${userId}_${clientId}`;
+
+        if (getClient(realClientId) && getIsReady(realClientId)) {
             let profile = null;
             let text = null;
             let status = 'failed';
@@ -111,7 +137,7 @@ io.on('connection', (socket) => {
                 console.log(`Mensaje generado para enviar por ${clientId}:`, text);
 
                 const targetNumber = profile?.phone || number;
-                await sendWhatsAppMessage(clientId, targetNumber, text);
+                await sendWhatsAppMessage(realClientId, targetNumber, text);
                 status = 'sent';
                 socket.emit('message_sent', { clientId, success: true, to: targetNumber });
             } catch (e) {
@@ -129,8 +155,9 @@ io.on('connection', (socket) => {
 
     socket.on('logout', async ({ clientId }) => {
         if (clientId) {
-            await logoutWhatsApp(clientId);
-            socket.emit('sessions_list', { sessions: getSavedSessions() });
+            const realClientId = `user_${userId}_${clientId}`;
+            await logoutWhatsApp(realClientId);
+            socket.emit('sessions_list', { sessions: getSavedSessions(userId) });
         }
     });
 
