@@ -3,7 +3,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import { generateTestMessage, generateMessageForProfile } from './src/services/ai.js';
-import { setIo, getClient, getIsReady, initWhatsApp, sendWhatsAppMessage, logoutWhatsApp } from './src/services/whatsapp.js';
+import { setIo, getClient, getIsReady, initWhatsApp, sendWhatsAppMessage, logoutWhatsApp, getSavedSessions } from './src/services/whatsapp.js';
 import prisma from './src/config/db.js';
 import profileRoutes from './src/routes/profile.routes.js';
 import snapshotRoutes from './src/routes/snapshot.routes.js';
@@ -60,30 +60,38 @@ app.set('io', io);
 
 // Configuración de rutas básicas
 app.get('/', (req, res) => {
-    res.send({ status: 'API is running', whatsappReady: getIsReady() });
+    res.send({ status: 'API is running', multiClient: true });
 });
 
 // Iniciar sesión bajo demanda a través de Websockets
 io.on('connection', (socket) => {
     console.log(`Cliente web conectado: ${socket.id}`);
 
-    // Si ya está listo, avisarle de inmediato
-    if (getIsReady()) {
-        socket.emit('ready', { status: 'Ya conectado' });
-    }
+    // Devolver lista de sesiones
+    socket.emit('sessions_list', { sessions: getSavedSessions() });
 
-    socket.on('start-connection', () => {
-        if (!getClient()) {
-            initWhatsApp();
-        } else if (getIsReady()) {
-            socket.emit('ready', { status: 'Ya conectado' });
+    socket.on('start-connection', ({ clientId }) => {
+        if (!clientId) {
+            socket.emit('error', { message: 'Se requiere un clientId' });
+            return;
+        }
+        if (!getClient(clientId)) {
+            initWhatsApp(clientId);
+        } else if (getIsReady(clientId)) {
+            socket.emit('ready', { clientId, status: 'Ya conectado' });
         } else {
-            console.log('El cliente ya está en proceso de inicio.');
+            console.log(`El cliente ${clientId} ya está en proceso de inicio.`);
         }
     });
 
     socket.on('send_message', async (data) => {
-        if (getClient() && getIsReady()) {
+        const { clientId } = data;
+        if (!clientId) {
+            socket.emit('message_sent', { success: false, error: 'Falta clientId origen' });
+            return;
+        }
+
+        if (getClient(clientId) && getIsReady(clientId)) {
             let profile = null;
             let text = null;
             let status = 'failed';
@@ -100,15 +108,15 @@ io.on('connection', (socket) => {
                     text = await generateTestMessage(patientName, topic);
                 }
 
-                console.log('Mensaje generado para enviar:', text);
+                console.log(`Mensaje generado para enviar por ${clientId}:`, text);
 
                 const targetNumber = profile?.phone || number;
-                await sendWhatsAppMessage(targetNumber, text);
+                await sendWhatsAppMessage(clientId, targetNumber, text);
                 status = 'sent';
-                socket.emit('message_sent', { success: true, to: targetNumber });
+                socket.emit('message_sent', { clientId, success: true, to: targetNumber });
             } catch (e) {
-                console.error('Error al enviar mensaje desde la UI:', e);
-                socket.emit('message_sent', { success: false, error: e.message });
+                console.error(`Error al enviar mensaje desde la UI (${clientId}):`, e);
+                socket.emit('message_sent', { clientId, success: false, error: e.message });
             } finally {
                 if (profile && text) {
                     await prisma.messageLog.create({
@@ -119,8 +127,11 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('logout', async () => {
-        await logoutWhatsApp();
+    socket.on('logout', async ({ clientId }) => {
+        if (clientId) {
+            await logoutWhatsApp(clientId);
+            socket.emit('sessions_list', { sessions: getSavedSessions() });
+        }
     });
 
     socket.on('disconnect', () => {

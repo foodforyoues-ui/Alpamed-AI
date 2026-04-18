@@ -148,147 +148,146 @@ export default function Home() {
             <Menu className="w-6 h-6" />
           </button>
         </div>
-      </div>
-
-      {/* Botón flotante Desktop para Abrir Sidebar */}
-      <button 
-        onClick={() => setIsSidebarOpen(true)}
-        className={`print:hidden hidden md:flex fixed top-5 left-5 z-40 items-center justify-center p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm rounded-xl text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-white transition-all duration-300 hover:scale-105 active:scale-95 ${isSidebarOpen ? 'opacity-0 pointer-events-none -translate-x-10' : 'opacity-100 translate-x-0'}`}
-      >
-        <Menu className="w-5 h-5" />
-      </button>
-
-      {/* Overlay para móviles */}
+            {/* Overlay para móviles */}
       <div 
         className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300 ${isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         onClick={() => setIsSidebarOpen(false)}
       />
 
       {/* Sidebar */}
-      <aside className={`print:hidden fixed md:relative inset-y-0 left-0 z-50 bg-white dark:bg-slate-900 md:bg-white dark:bg-slate-900/80 border-r border-slate-200 dark:border-slate-800 flex flex-col backdrop-blur-sm transition-all duration-300 ease-in-out shrink-0 overflow-hidden ${isSidebarOpen ? "w-64 translate-x-0" : "w-64 md:w-0 -translate-x-full md:translate-x-0 md:border-r-0 md:opacity-0"}`}>
-        <div className="w-64 flex flex-col h-full shrink-0 relative">
+      <aside className={`print:hidden fixed md:relative inset-y-0 left-0 z-50 bg-white dark:bg-slate-900 md:bg-white dark:bg-slate-900/80 border-r border-slate-200 dark:border-slate-800 flex flex-col backdrop-blur-sm transition-all duration-300 ease-in-out shrink-0 overflow-y-visible ${isSidebarOpen ? "w-64 translate-x-0" : "w-64 md:w-20 -translate-x-full md:translate-x-0"}`}>
+        <div className="flex flex-col h-full relative">
+          <button 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+            className="absolute top-6 -right-3 p-1 hidden md:flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-800 rounded-full transition-colors border border-slate-200 dark:border-slate-700 shadow-md z-10"
+          >
+            {isSidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+          </button>
           <button 
             onClick={() => setIsSidebarOpen(false)} 
-            className="absolute top-4 right-4 p-1.5 hidden md:flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-800 rounded-lg transition-colors border border-slate-200 dark:border-slate-700 z-10"
+            className="absolute top-4 right-4 p-1.5 md:hidden flex items-center justify-center text-slate-500 bg-slate-50 dark:bg-slate-700 rounded-lg z-10"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-        {/* Logo */}
-          <div className="p-5 border-b border-slate-200 dark:border-slate-800 pt-7 md:pt-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center p-1.5 shadow-md border border-slate-200 dark:border-slate-300">
-                  <img src="/alpalogo.png" alt="Alpamed" className="w-full h-full object-contain" />
-                </div>
-                <div>
-                  <h1 className="text-slate-900 dark:text-white font-bold text-lg leading-tight">Alpamed</h1>
-                  <p className="text-slate-500 dark:text-slate-400 text-xs">Panel Administrativo</p>
-                </div>
+          
+          {/* Logo */}
+          <div className="p-5 border-b border-slate-200 dark:border-slate-800 pt-7 flex items-center justify-center md:justify-start overflow-hidden">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 shrink-0 bg-white rounded-xl flex items-center justify-center p-1.5 shadow-sm border border-slate-200 dark:border-slate-300 transition-all">
+                <img src="/alpalogo.png" alt="Alpamed" className="w-full h-full object-contain" />
               </div>
-              <button onClick={() => {
-                if (document.documentElement.classList.contains('dark')) {
-                  document.documentElement.classList.remove('dark');
-                  localStorage.setItem('theme', 'light');
-                } else {
-                  document.documentElement.classList.add('dark');
-                  localStorage.setItem('theme', 'dark');
-                }
-              }} className="p-2 hidden md:block text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-white bg-slate-100 dark:bg-slate-800 rounded-xl transition-colors border border-slate-200 dark:border-slate-700">
-                <span className="block dark:hidden">🌙</span>
-                <span className="hidden dark:block">☀️</span>
-              </button>
+              {/* Texto de Logo: Oculto cuando el sidebar está cerrado en desktop */}
+              <div className={`whitespace-nowrap transition-all duration-300 ${!isSidebarOpen ? "md:opacity-0 md:w-0 md:hidden" : "opacity-100 w-auto"}`}>
+                <h1 className="text-slate-900 dark:text-white font-bold text-lg leading-tight">Alpamed</h1>
+                <p className="text-slate-500 dark:text-slate-400 text-xs">Panel Administrativo</p>
+              </div>
             </div>
           </div>
 
           {/* Nav */}
-          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          <nav className="flex-1 p-3 space-y-1.5 overflow-y-auto overflow-x-hidden">
             <button
-              onClick={() => { setView("dashboard"); setIsSidebarOpen(false); }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
+              onClick={() => { setView("dashboard"); setIsSidebarOpen(window.innerWidth >= 768 ? isSidebarOpen : false); }}
+              title="Perfiles"
+              className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-700 ${
                 view === "dashboard"
-                  ? "bg-primary/20 text-primary border border-primary/30"
-                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800 hover:text-slate-900 dark:text-white"
-              }`}
+                  ? "bg-primary/20 text-primary border-primary/30"
+                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+              } ${!isSidebarOpen && "md:justify-center"}`}
             >
-              <Users className="w-5 h-5" />
-              <span className="font-medium">Perfiles</span>
+              <Users className="w-5 h-5 shrink-0" />
+              <span className={`font-medium whitespace-nowrap ${!isSidebarOpen ? "md:hidden" : "block"}`}>Perfiles</span>
             </button>
             <button
-              onClick={() => { setView("whatsapp"); setIsSidebarOpen(false); }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
+              onClick={() => { setView("whatsapp"); setIsSidebarOpen(window.innerWidth >= 768 ? isSidebarOpen : false); }}
+              title="WhatsApp"
+              className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-700 ${
                 view === "whatsapp"
-                  ? "bg-primary/20 text-primary border border-primary/30"
-                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800 hover:text-slate-900 dark:text-white"
-              }`}
+                  ? "bg-primary/20 text-primary border-primary/30"
+                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+              } ${!isSidebarOpen && "md:justify-center"}`}
             >
-              <Smartphone className="w-5 h-5" />
-              <span className="font-medium">WhatsApp</span>
+              <Smartphone className="w-5 h-5 shrink-0" />
+              <span className={`font-medium whitespace-nowrap ${!isSidebarOpen ? "md:hidden" : "block"}`}>WhatsApp</span>
             </button>
             <button
-              onClick={() => { setView("messages"); setIsSidebarOpen(false); }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
+              onClick={() => { setView("messages"); setIsSidebarOpen(window.innerWidth >= 768 ? isSidebarOpen : false); }}
+              title="Mensajes"
+              className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-700 ${
                 view === "messages"
-                  ? "bg-primary/20 text-primary border border-primary/30"
-                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800 hover:text-slate-900 dark:text-white"
-              }`}
+                  ? "bg-primary/20 text-primary border-primary/30"
+                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+              } ${!isSidebarOpen && "md:justify-center"}`}
             >
-              <Send className="w-5 h-5" />
-              <span className="font-medium">Mensajes</span>
+              <Send className="w-5 h-5 shrink-0" />
+              <span className={`font-medium whitespace-nowrap ${!isSidebarOpen ? "md:hidden" : "block"}`}>Mensajes</span>
             </button>
             <button
-              onClick={() => { setView("appointments"); setIsSidebarOpen(false); }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
+              onClick={() => { setView("appointments"); setIsSidebarOpen(window.innerWidth >= 768 ? isSidebarOpen : false); }}
+              title="Citas"
+              className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-700 ${
                 view === "appointments"
-                  ? "bg-primary/20 text-primary border border-primary/30"
-                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800 hover:text-slate-900 dark:text-white"
-              }`}
+                  ? "bg-primary/20 text-primary border-primary/30"
+                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+              } ${!isSidebarOpen && "md:justify-center"}`}
             >
-              <Calendar className="w-5 h-5" />
-              <span className="font-medium">Citas</span>
+              <Calendar className="w-5 h-5 shrink-0" />
+              <span className={`font-medium whitespace-nowrap ${!isSidebarOpen ? "md:hidden" : "block"}`}>Citas</span>
             </button>
             <button
-              onClick={() => { setView("calendar"); setIsSidebarOpen(false); }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
+              onClick={() => { setView("calendar"); setIsSidebarOpen(window.innerWidth >= 768 ? isSidebarOpen : false); }}
+              title="Calendario"
+              className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-700 ${
                 view === "calendar"
-                  ? "bg-primary/20 text-primary border border-primary/30"
-                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800 hover:text-slate-900 dark:text-white"
-              }`}
+                  ? "bg-primary/20 text-primary border-primary/30"
+                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+              } ${!isSidebarOpen && "md:justify-center"}`}
             >
-              <CalendarDays className="w-5 h-5" />
-              <span className="font-medium">Calendario</span>
+              <CalendarDays className="w-5 h-5 shrink-0" />
+              <span className={`font-medium whitespace-nowrap ${!isSidebarOpen ? "md:hidden" : "block"}`}>Calendario</span>
             </button>
             <button
-              onClick={() => { setView("users"); setIsSidebarOpen(false); }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
+              onClick={() => { setView("users"); setIsSidebarOpen(window.innerWidth >= 768 ? isSidebarOpen : false); }}
+              title="Usuarios"
+              className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-700 ${
                 view === "users"
-                  ? "bg-primary/20 text-primary border border-primary/30"
-                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800 hover:text-slate-900 dark:text-white"
-              }`}
+                  ? "bg-primary/20 text-primary border-primary/30"
+                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+              } ${!isSidebarOpen && "md:justify-center"}`}
             >
-              <Shield className="w-5 h-5" />
-              <span className="font-medium">Usuarios</span>
+              <Shield className="w-5 h-5 shrink-0" />
+              <span className={`font-medium whitespace-nowrap ${!isSidebarOpen ? "md:hidden" : "block"}`}>Usuarios</span>
             </button>
           </nav>
 
           {/* Stats & Actions */}
-          <div className="p-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
-            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3">
-              <p className="text-slate-600 text-xs">Total Pacientes</p>
-              <p className="text-slate-900 dark:text-white text-2xl font-bold">{profiles.length}</p>
-            </div>
+          <div className="p-3 border-t border-slate-200 dark:border-slate-800 space-y-3">
+            {isSidebarOpen ? (
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3 text-center">
+                <p className="text-slate-600 text-xs">Total Pacientes</p>
+                <p className="text-slate-900 dark:text-white text-2xl font-bold">{profiles.length}</p>
+              </div>
+            ) : (
+                <div className="md:flex hidden bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3 flex-col items-center justify-center">
+                     <Users className="w-4 h-4 text-slate-500 mb-1" />
+                     <p className="text-slate-900 dark:text-white text-sm font-bold">{profiles.length}</p>
+                </div>
+            )}
             
             <button
               onClick={() => {
                 Cookies.remove("token");
                 window.location.href = "/login";
               }}
-              className="w-full flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-medium py-2.5 rounded-xl transition-all border border-red-500/20 shadow-sm"
+              title="Cerrar Sesión"
+              className={`w-full flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-medium p-2.5 rounded-xl transition-all border border-red-500/20 shadow-sm ${!isSidebarOpen ? "justify-center" : "justify-center"}`}
             >
-              <LogOut className="w-4 h-4" />
-              <span className="text-sm">Cerrar Sesión</span>
+              <LogOut className="w-5 h-5 shrink-0" />
+              <span className={`text-sm whitespace-nowrap ${!isSidebarOpen ? "md:hidden" : "block"}`}>Cerrar Sesión</span>
             </button>
           </div>
         </div>
+      </aside>v>
         </aside>
 
         {/* Main Content */}
@@ -308,7 +307,7 @@ export default function Home() {
                 </div>
                 <Link
                   href="/profiles/new"
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary hover:opacity-90 text-white font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl transition-all shadow-lg shadow-primary/30 active:scale-95"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary hover:opacity-90 text-slate-900 dark:text-white font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl transition-all shadow-lg shadow-primary/30 active:scale-95"
                 >
                   <Plus className="w-5 h-5" />
                   <span>Nuevo Perfil</span>
@@ -364,7 +363,7 @@ export default function Home() {
                   <p className="text-slate-600 mt-2 mb-6">Crea el primer expediente de paciente para comenzar.</p>
                   <Link
                     href="/profiles/new"
-                    className="inline-flex items-center gap-2 bg-primary hover:opacity-90 text-white font-semibold px-6 py-3 rounded-xl transition-all"
+                    className="inline-flex items-center gap-2 bg-primary hover:opacity-90 text-slate-900 dark:text-white font-semibold px-6 py-3 rounded-xl transition-all"
                   >
                     <Plus className="w-5 h-5" /> Crear primer perfil
                   </Link>
@@ -393,7 +392,7 @@ export default function Home() {
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-                            <span className="text-white text-xl font-bold">
+                            <span className="text-slate-900 dark:text-white text-xl font-bold">
                               {profile.patientName.charAt(0).toUpperCase()}
                             </span>
                           </div>
@@ -555,6 +554,10 @@ function WhatsAppSection() {
   const [selectedProfileId, setSelectedProfileId] = useState<string>("");
   const [sendMessageStatus, setSendMessageStatus] = useState<{ loading: boolean; success?: boolean; msg?: string }>({ loading: false });
 
+  // Novedades para Multi-Cliente
+  const [sessionsList, setSessionsList] = useState<string[]>([]);
+  const [clientNameInput, setClientNameInput] = useState("");
+  const [activeClientId, setActiveClientId] = useState<string | null>(null);
 
   useEffect(() => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -563,17 +566,29 @@ function WhatsAppSection() {
     });
     setSocket(newSocket);
 
-    newSocket.on("qr", (qr: string) => { setQrCode(qr); setStatus("qr"); });
-    newSocket.on("loading", () => setStatus("loading"));
-    newSocket.on("ready", () => setStatus("connected"));
-    newSocket.on("auth_failure", (data) => { setStatus("error"); setErrorMessage("Fallo la autenticación. Intenta de nuevo."); });
-    newSocket.on("disconnected", () => { setStatus("idle"); setQrCode(""); });
-    newSocket.on("message_sent", (data) => {
-      setSendMessageStatus({ loading: false, success: data.success, msg: data.success ? "✅ Mensaje enviado exitosamente" : `❌ ${data.error}` });
-      setTimeout(() => setSendMessageStatus({ loading: false }), 5000);
+    newSocket.on("sessions_list", (data: { sessions: string[] }) => setSessionsList(data.sessions));
+    
+    newSocket.on("qr", (data: { clientId: string, qr: string }) => { 
+        if (data.clientId === activeClientId) { setQrCode(data.qr); setStatus("qr"); }
     });
-
-
+    newSocket.on("loading", (data: { clientId: string, message: string }) => {
+        if (data.clientId === activeClientId) setStatus("loading");
+    });
+    newSocket.on("ready", (data: { clientId: string, status: string }) => {
+        if (data.clientId === activeClientId) { setStatus("connected"); }
+    });
+    newSocket.on("auth_failure", (data: { clientId: string }) => { 
+        if (data.clientId === activeClientId) { setStatus("error"); setErrorMessage("Fallo la autenticación. Intenta de nuevo."); }
+    });
+    newSocket.on("disconnected", (data: { clientId: string }) => { 
+        if (data.clientId === activeClientId) { setStatus("idle"); setQrCode(""); setActiveClientId(null); }
+    });
+    newSocket.on("message_sent", (data: { clientId: string, success: boolean, error?: string }) => {
+      if (data.clientId === activeClientId) {
+          setSendMessageStatus({ loading: false, success: data.success, msg: data.success ? "✅ Mensaje enviado exitosamente" : `❌ ${data.error}` });
+          setTimeout(() => setSendMessageStatus({ loading: false }), 5000);
+      }
+    });
 
     fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/profiles`)
       .then(r => r.json())
@@ -581,13 +596,27 @@ function WhatsAppSection() {
       .catch(console.error);
 
     return () => { newSocket.disconnect(); };
-  }, []);
+  }, [activeClientId]);
 
   const handleSendMessage = () => {
-    if (socket && selectedProfileId) {
+    if (socket && selectedProfileId && activeClientId) {
       setSendMessageStatus({ loading: true });
-      socket.emit("send_message", { profileId: parseInt(selectedProfileId) });
+      socket.emit("send_message", { profileId: parseInt(selectedProfileId), clientId: activeClientId });
     }
+  };
+
+  const handleStartConnection = (isNew: boolean, savedId?: string) => {
+      let idToUse = "";
+      if (isNew) {
+          if (!clientNameInput.trim()) return alert("Por favor escribe un nombre para la sesión.");
+          idToUse = clientNameInput.trim();
+      } else if (savedId) {
+          idToUse = savedId;
+      }
+      
+      setActiveClientId(idToUse);
+      setStatus("loading");
+      socket?.emit("start-connection", { clientId: idToUse });
   };
 
 
@@ -612,14 +641,37 @@ function WhatsAppSection() {
 
           <div className="p-6">
             {status === "idle" && (
-              <div className="text-center space-y-4">
-                <p className="text-slate-600 dark:text-slate-400">Conecta tu cuenta de WhatsApp para enviar recomendaciones automáticas.</p>
-                <button
-                  onClick={() => { setStatus("loading"); socket?.emit("start-connection"); }}
-                  className="w-full bg-primary hover:bg-primary text-slate-900 dark:text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-lg shadow-primary/30"
-                >
-                  Vincular Dispositivo
-                </button>
+              <div className="space-y-6">
+                {sessionsList.length > 0 && (
+                    <div className="bg-slate-200 dark:bg-slate-700/50 rounded-xl p-4">
+                      <h4 className="font-semibold text-slate-800 dark:text-white mb-3">Conexiones Guardadas</h4>
+                      <div className="space-y-2">
+                          {sessionsList.map(s => (
+                              <button key={s} onClick={() => handleStartConnection(false, s)} className="w-full text-left bg-white dark:bg-slate-800 hover:bg-slate-50 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-2.5 transition-colors flex items-center justify-between">
+                                  <span className="font-medium text-slate-700 dark:text-slate-200">{s}</span>
+                                  <ChevronRight className="w-4 h-4 text-slate-400" />
+                              </button>
+                          ))}
+                      </div>
+                    </div>
+                )}
+
+                <div className="bg-slate-200 dark:bg-slate-700/50 rounded-xl p-4 space-y-3">
+                  <h4 className="font-semibold text-slate-800 dark:text-white">Conectar Nuevo Dispositivo</h4>
+                  <input
+                    type="text"
+                    placeholder="Ej. Dra. Ana, Recepción..."
+                    value={clientNameInput}
+                    onChange={e => setClientNameInput(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm text-slate-800 dark:text-white"
+                  />
+                  <button
+                    onClick={() => handleStartConnection(true)}
+                    className="w-full bg-primary hover:bg-primary/90 text-slate-900 font-semibold py-3 px-6 rounded-xl transition-all shadow-lg shadow-primary/30"
+                  >
+                    Vincular Nuevo Dispositivo
+                  </button>
+                </div>
               </div>
             )}
 
@@ -684,20 +736,18 @@ function WhatsAppSection() {
 
                 <div className="pt-2">
                   <button
-                    onClick={() => { setStatus("loading"); socket?.emit("logout"); }}
+                    onClick={() => { setStatus("loading"); socket?.emit("logout", { clientId: activeClientId }); setClientNameInput(""); }}
                     className="w-full flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-semibold py-3 rounded-xl transition-all border border-red-500/30 shadow-sm"
                   >
-                    <LogOut className="w-5 h-5" /> Desvincular WhatsApp
+                    <LogOut className="w-5 h-5" /> Desvincular {activeClientId}
                   </button>
                 </div>
 
-
-
                 <button
-                  onClick={() => socket?.emit("logout")}
+                  onClick={() => { setActiveClientId(null); setStatus("idle"); }}
                   className="w-full bg-slate-200 dark:bg-slate-700 hover:bg-slate-600 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:text-white font-medium py-2.5 px-6 rounded-xl transition-all"
                 >
-                  Cerrar Sesión de WhatsApp
+                  Regresar al Menú (Cerrar Tab)
                 </button>
               </div>
             )}
