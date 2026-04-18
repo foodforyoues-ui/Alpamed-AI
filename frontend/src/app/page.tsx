@@ -148,7 +148,9 @@ export default function Home() {
             <Menu className="w-6 h-6" />
           </button>
         </div>
-            {/* Overlay para móviles */}
+      </div>
+      
+      {/* Overlay para móviles */}
       <div 
         className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300 ${isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         onClick={() => setIsSidebarOpen(false)}
@@ -287,8 +289,7 @@ export default function Home() {
             </button>
           </div>
         </div>
-      </aside>v>
-        </aside>
+      </aside>
 
         {/* Main Content */}
         <main className="print:hidden flex-1 h-full overflow-y-auto w-full relative">
