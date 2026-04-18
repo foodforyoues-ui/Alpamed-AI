@@ -593,6 +593,7 @@ function WhatsAppSection() {
   useEffect(() => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
     const newSocket = io(apiUrl, {
+      auth: { token: Cookies.get("token") },
       extraHeaders: { "ngrok-skip-browser-warning": "69420" }
     });
     setSocket(newSocket);
