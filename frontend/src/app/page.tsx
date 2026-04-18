@@ -50,6 +50,19 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  const fetchCurrentUser = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/auth/me`);
+      if (res.ok) {
+        const data = await res.json();
+        setCurrentUser(data.user);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const handleToggleActive = async (profile: Profile) => {
     try {
@@ -107,6 +120,7 @@ export default function Home() {
       setIsSidebarOpen(true);
     }
     fetchProfiles();
+    fetchCurrentUser();
   }, []);
 
   const handleDelete = async (id: number, name: string) => {
@@ -248,18 +262,20 @@ export default function Home() {
               <CalendarDays className="w-5 h-5 shrink-0" />
               <span className={`font-medium whitespace-nowrap ${!isSidebarOpen ? "md:hidden" : "block"}`}>Calendario</span>
             </button>
-            <button
-              onClick={() => { setView("users"); setIsSidebarOpen(window.innerWidth >= 768 ? isSidebarOpen : false); }}
-              title="Usuarios"
-              className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-700 ${
-                view === "users"
-                  ? "bg-primary/20 text-primary border-primary/30"
-                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
-              } ${!isSidebarOpen && "md:justify-center"}`}
-            >
-              <Shield className="w-5 h-5 shrink-0" />
-              <span className={`font-medium whitespace-nowrap ${!isSidebarOpen ? "md:hidden" : "block"}`}>Usuarios</span>
-            </button>
+            {currentUser?.role === "admin" && (
+              <button
+                onClick={() => { setView("users"); setIsSidebarOpen(window.innerWidth >= 768 ? isSidebarOpen : false); }}
+                title="Usuarios"
+                className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-700 ${
+                  view === "users"
+                    ? "bg-primary/20 text-primary border-primary/30"
+                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+                } ${!isSidebarOpen && "md:justify-center"}`}
+              >
+                <Shield className="w-5 h-5 shrink-0" />
+                <span className={`font-medium whitespace-nowrap ${!isSidebarOpen ? "md:hidden" : "block"}`}>Usuarios</span>
+              </button>
+            )}
           </nav>
 
           {/* Stats & Actions */}
@@ -1628,7 +1644,8 @@ function UsersSection() {
   const [form, setForm] = useState({
     name: "",
     email: "",
-    password: ""
+    password: "",
+    role: "user"
   });
 
   const fetchUsers = async () => {
@@ -1663,7 +1680,7 @@ function UsersSection() {
       const data = await res.json();
 
       if (res.ok) {
-        setForm({ name: "", email: "", password: "" });
+        setForm({ name: "", email: "", password: "", role: "user" });
         setShowModal(false);
         fetchUsers();
       } else {
@@ -1673,6 +1690,25 @@ function UsersSection() {
       alert("Error de conexión");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleRoleChange = async (id: number, newRole: string) => {
+    if (!confirm(`¿Seguro que deseas cambiar los permisos de este usuario a ${newRole}?`)) return;
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/auth/users/${id}/role`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: newRole })
+      });
+      if (res.ok) {
+        setUsers(users.map(u => u.id === id ? { ...u, role: newRole } : u));
+      } else {
+        const data = await res.json();
+        alert(data.error || "Error al cambiar rol");
+      }
+    } catch (e) {
+      alert("Error de red al cambiar rol.");
     }
   };
 
@@ -1726,16 +1762,27 @@ function UsersSection() {
                   <div className="w-12 h-12 bg-slate-200 dark:bg-slate-700 text-primary rounded-xl flex items-center justify-center font-bold text-xl">
                     {u.name ? u.name.charAt(0).toUpperCase() : u.email.charAt(0).toUpperCase()}
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-slate-900 dark:text-white">{u.name || "Sin nombre"}</h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 truncate w-40">{u.email}</p>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-slate-900 dark:text-white line-clamp-1">{u.name || "Sin nombre"}</h3>
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${u.role === 'admin' ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}`}>
+                        {u.role === 'admin' ? 'Admin' : 'Normal'}
+                      </span>
+                    </div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 w-full break-all">{u.email}</p>
                   </div>
                 </div>
                 <div className="bg-white dark:bg-slate-900/50 rounded-lg p-3 text-sm text-slate-600 dark:text-slate-400">
                   Registrado el {new Date(u.createdAt).toLocaleDateString()}
                 </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-slate-300 dark:border-slate-700/50 flex justify-end">
+              <div className="mt-4 pt-4 border-t border-slate-300 dark:border-slate-700/50 flex items-center justify-between">
+                <button
+                  onClick={() => handleRoleChange(u.id, u.role === 'admin' ? 'user' : 'admin')}
+                  className="text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors"
+                >
+                  {u.role === 'admin' ? 'Revocar Admin' : 'Hacer Admin'}
+                </button>
                 <button
                   onClick={() => handleDelete(u.id)}
                   disabled={deleting === u.id}
@@ -1816,6 +1863,18 @@ function UsersSection() {
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Nivel de Acceso</label>
+                  <select
+                    value={form.role}
+                    onChange={(e) => setForm({ ...form, role: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all appearance-none"
+                  >
+                    <option value="user">Usuario Normal (Personal)</option>
+                    <option value="admin">Administrador (Dueño)</option>
+                  </select>
                 </div>
                 
                 <div className="pt-2">
