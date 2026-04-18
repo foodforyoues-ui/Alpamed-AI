@@ -1,7 +1,7 @@
 "use client";
 
 import { apiFetch as fetch } from "@/lib/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import Cookies from "js-cookie";
 import { motion, AnimatePresence } from "framer-motion";
@@ -558,7 +558,15 @@ function WhatsAppSection() {
   // Novedades para Multi-Cliente
   const [sessionsList, setSessionsList] = useState<string[]>([]);
   const [clientNameInput, setClientNameInput] = useState("");
-  const [activeClientId, setActiveClientId] = useState<string | null>(null);
+  
+  const [activeClientIdState, setActiveClientIdState] = useState<string | null>(null);
+  const activeClientIdRef = useRef<string | null>(null);
+
+  const activeClientId = activeClientIdState;
+  const setActiveClientId = (id: string | null) => {
+    activeClientIdRef.current = id;
+    setActiveClientIdState(id);
+  };
 
   useEffect(() => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -570,22 +578,22 @@ function WhatsAppSection() {
     newSocket.on("sessions_list", (data: { sessions: string[] }) => setSessionsList(data.sessions));
     
     newSocket.on("qr", (data: { clientId: string, qr: string }) => { 
-        if (data.clientId === activeClientId) { setQrCode(data.qr); setStatus("qr"); }
+        if (data.clientId === activeClientIdRef.current) { setQrCode(data.qr); setStatus("qr"); }
     });
     newSocket.on("loading", (data: { clientId: string, message: string }) => {
-        if (data.clientId === activeClientId) setStatus("loading");
+        if (data.clientId === activeClientIdRef.current) setStatus("loading");
     });
     newSocket.on("ready", (data: { clientId: string, status: string }) => {
-        if (data.clientId === activeClientId) { setStatus("connected"); }
+        if (data.clientId === activeClientIdRef.current) { setStatus("connected"); }
     });
     newSocket.on("auth_failure", (data: { clientId: string }) => { 
-        if (data.clientId === activeClientId) { setStatus("error"); setErrorMessage("Fallo la autenticación. Intenta de nuevo."); }
+        if (data.clientId === activeClientIdRef.current) { setStatus("error"); setErrorMessage("Fallo la autenticación. Intenta de nuevo."); }
     });
     newSocket.on("disconnected", (data: { clientId: string }) => { 
-        if (data.clientId === activeClientId) { setStatus("idle"); setQrCode(""); setActiveClientId(null); }
+        if (data.clientId === activeClientIdRef.current) { setStatus("idle"); setQrCode(""); setActiveClientId(null); }
     });
     newSocket.on("message_sent", (data: { clientId: string, success: boolean, error?: string }) => {
-      if (data.clientId === activeClientId) {
+      if (data.clientId === activeClientIdRef.current) {
           setSendMessageStatus({ loading: false, success: data.success, msg: data.success ? "✅ Mensaje enviado exitosamente" : `❌ ${data.error}` });
           setTimeout(() => setSendMessageStatus({ loading: false }), 5000);
       }
@@ -597,7 +605,7 @@ function WhatsAppSection() {
       .catch(console.error);
 
     return () => { newSocket.disconnect(); };
-  }, [activeClientId]);
+  }, []);
 
   const handleSendMessage = () => {
     if (socket && selectedProfileId && activeClientId) {
