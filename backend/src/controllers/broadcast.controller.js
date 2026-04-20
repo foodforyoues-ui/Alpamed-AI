@@ -1,6 +1,6 @@
 import prisma from '../config/db.js';
 import { generateMessageForProfile } from '../services/ai.js';
-import { sendWhatsAppMessage, getIsReady } from '../services/whatsapp.js';
+import { sendWhatsAppMessage, getAnyReadyClientId } from '../services/whatsapp.js';
 
 /**
  * GET /api/messages/status
@@ -12,7 +12,7 @@ export async function getStatus(req, res) {
         const sent = await prisma.messageLog.count({ where: { status: 'sent' } });
         const totalProfiles = await prisma.profile.count();
         res.json({
-            whatsappReady: getIsReady(),
+            whatsappReady: !!getAnyReadyClientId(),
             totalMessages: total,
             sentMessages: sent,
             totalProfiles,
@@ -29,7 +29,8 @@ export async function getStatus(req, res) {
  * Emite progreso en tiempo real via WebSocket si ioRef está disponible.
  */
 export async function broadcastMessages(req, res) {
-    if (!getIsReady()) {
+    const readyClientId = getAnyReadyClientId();
+    if (!readyClientId) {
         return res.status(400).json({
             error: 'WhatsApp no está conectado. Ve a la sección WhatsApp del dashboard y vincula tu cuenta primero.'
         });
@@ -52,10 +53,10 @@ export async function broadcastMessages(req, res) {
     });
 
     // Ejecutar en background  
-    processBroadcast(profiles, req.io);
+    processBroadcast(profiles, req.io, readyClientId);
 }
 
-async function processBroadcast(profiles, io) {
+async function processBroadcast(profiles, io, clientId) {
     console.log(`\n🚀 Iniciando broadcast de mensajes a ${profiles.length} pacientes...`);
 
     const results = [];
@@ -91,7 +92,7 @@ async function processBroadcast(profiles, io) {
             if (text) {
                 try {
                     console.log(`\n📱 [${profile.patientName}] Enviando WhatsApp...`);
-                    await sendWhatsAppMessage(profile.phone, text);
+                    await sendWhatsAppMessage(clientId, profile.phone, text);
                     currentStatus = 'sent';
                     console.log(`✅ [${profile.patientName}] Enviado correctamente.`);
                 } catch (err) {

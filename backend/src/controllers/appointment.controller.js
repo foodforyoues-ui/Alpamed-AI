@@ -1,6 +1,6 @@
 import prisma from '../config/db.js';
 import { generateAppointmentReminder } from '../services/ai.js';
-import { sendWhatsAppMessage, getIsReady } from '../services/whatsapp.js';
+import { sendWhatsAppMessage, getAnyReadyClientId } from '../services/whatsapp.js';
 
 export const getAppointments = async (req, res) => {
   try {
@@ -111,8 +111,9 @@ export const deleteAppointment = async (req, res) => {
 
 export const sendAppointmentReminders = async (req, res) => {
   const io = req.app.get('io');
-  
-  if (!getIsReady()) {
+  const readyClientId = getAnyReadyClientId();
+
+  if (!readyClientId) {
     return res.status(503).json({ error: 'WhatsApp no está conectado' });
   }
 
@@ -181,7 +182,7 @@ export const sendAppointmentReminders = async (req, res) => {
           if (text) {
             try {
               console.log(`Enviando WhatsApp a ${app.profile.phone}...`);
-              await sendWhatsAppMessage(app.profile.phone, text);
+              await sendWhatsAppMessage(readyClientId, app.profile.phone, text);
               sentCount++;
               console.log(`✅ Enviado con éxito a ${app.profile.patientName}`);
             } catch (err) {

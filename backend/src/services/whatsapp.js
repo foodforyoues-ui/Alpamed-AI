@@ -21,6 +21,14 @@ export function getIsReady(clientId) {
     return mapIsReady.get(clientId) || false;
 }
 
+/** Returns the first clientId that is currently connected and ready, or null if none. */
+export function getAnyReadyClientId() {
+    for (const [clientId, ready] of mapIsReady.entries()) {
+        if (ready) return clientId;
+    }
+    return null;
+}
+
 export function getSavedSessions(userId) {
     if (!fs.existsSync(AUTH_DIR)) return [];
     try {
