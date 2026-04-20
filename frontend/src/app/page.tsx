@@ -847,6 +847,7 @@ function MessagesSection() {
 
     const apiUrl2 = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
     const socket = io(apiUrl2, {
+      auth: { token: Cookies.get("token") },
       extraHeaders: { "ngrok-skip-browser-warning": "69420" }
     });
 
