@@ -21,7 +21,9 @@ const app = express();
 const whitelist = [
     'http://localhost:3000',
     'https://nutria-rosy.vercel.app',
-    'https://nutria-git-main-walter-d3vs-projects.vercel.app'
+    'https://nutria-git-main-walter-d3vs-projects.vercel.app',
+    'https://alpamed-ai.vercel.app',
+    'https://alpamed-58veemzem-foodforyoues-uis-projects.vercel.app'
 ];
 
 app.use(cors({
