@@ -918,16 +918,15 @@ function MessagesSection() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/appointments/reminders`, { method: "POST" });
       const data = await res.json();
-      
-      if (res.status === 200 && data.message === "No hay citas pendientes para recordar") {
-        alert("No hay citas pendientes agendadas para enviar recordatorios.");
-        return;
-      }
 
-      if (res.ok) {
-        setReminderStatus({ isSending: true, current: 0, total: data.total, lastPatient: "", complete: false });
-      } else if (res.status === 503) {
+      if (res.status === 503) {
         alert("⚠️ WhatsApp no está conectado. Por favor, ve a la pestaña de 'WhatsApp', escanea el código QR y espera a que el estado sea 'Conectado' antes de enviar recordatorios.");
+      } else if (res.status === 200) {
+        // 200 = No hay citas para mañana (mensaje informativo)
+        alert(data.message || "No hay citas pendientes para mañana.");
+      } else if (res.status === 202) {
+        // 202 = Procesando en background
+        setReminderStatus({ isSending: true, current: 0, total: data.total, lastPatient: "", complete: false });
       } else {
         alert(data.error || "Error al iniciar recordatorios");
       }
@@ -935,6 +934,7 @@ function MessagesSection() {
       alert("Error de conexión");
     }
   };
+
 
   return (
     <div className="p-4 sm:p-6 md:p-8">

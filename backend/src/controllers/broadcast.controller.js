@@ -53,7 +53,7 @@ export async function broadcastMessages(req, res) {
     });
 
     // Ejecutar en background  
-    processBroadcast(profiles, req.io, readyClientId);
+    processBroadcast(profiles, req.app.get('io'), readyClientId);
 }
 
 async function processBroadcast(profiles, io, clientId) {
