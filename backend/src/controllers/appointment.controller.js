@@ -127,14 +127,22 @@ export const sendAppointmentReminders = async (req, res) => {
       orderBy: { date: 'asc' }
     });
 
-    const nowSV = new Date(new Date().getTime() - (6 * 60 * 60 * 1000));
-    const svTomorrow = new Date(Date.UTC(nowSV.getUTCFullYear(), nowSV.getUTCMonth(), nowSV.getUTCDate() + 1));
+    // El Salvador is UTC-6. "Tomorrow in SV" = the 24-hour window that
+    // starts at SV midnight (= UTC+6h) and ends 24h later.
+    const now = new Date();
+    // Shift "now" to SV local time expressed in UTC fields
+    const nowSV = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+    const svYear  = nowSV.getUTCFullYear();
+    const svMonth = nowSV.getUTCMonth();
+    const svDate  = nowSV.getUTCDate();
+
+    // SV midnight = UTC + 6 hours  (UTC-6 means midnight SV is 06:00 UTC next UTC day)
+    const tomorrowStartUTC = new Date(Date.UTC(svYear, svMonth, svDate + 1, 6, 0, 0)); // April 21 00:00 SV
+    const tomorrowEndUTC   = new Date(Date.UTC(svYear, svMonth, svDate + 2, 6, 0, 0)); // April 22 00:00 SV
 
     const tomorrowAppointments = rawAppointments.filter(app => {
-      const appDateSV = new Date(new Date(app.date).getTime() - (6 * 60 * 60 * 1000));
-      return appDateSV.getUTCFullYear() === svTomorrow.getUTCFullYear() &&
-             appDateSV.getUTCMonth() === svTomorrow.getUTCMonth() &&
-             appDateSV.getUTCDate() === svTomorrow.getUTCDate();
+      const t = new Date(app.date).getTime();
+      return t >= tomorrowStartUTC.getTime() && t < tomorrowEndUTC.getTime();
     });
 
     if (tomorrowAppointments.length === 0) {

@@ -1120,7 +1120,8 @@ function AppointmentsSection({ highlightId, onClearHighlight }: { highlightId: n
         : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/appointments`;
       const payload = {
         ...form,
-        date: new Date(form.date).toISOString()
+        // Append noon in UTC-6 (El Salvador) to avoid date shifting to previous day when Postgres/backend converts to UTC
+        date: new Date(`${form.date}T12:00:00-06:00`).toISOString()
       };
 
       const res = await fetch(url, {
